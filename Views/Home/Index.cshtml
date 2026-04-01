@@ -1,24 +1,52 @@
 ﻿@{
     ViewData["Title"] = "Trang Chủ";
 }
-<div class="p-5 mb-4 bg-light rounded-3 text-center" style="background: url('https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=1000') center/cover; color: white;">
-    <div class="container-fluid py-5" style="background: rgba(0,0,0,0.5); border-radius: 15px;">
-        <h1 class="display-5 fw-bold">Ăn Vặt Foodie - Ăn Là Ghiền!</h1>
-        <p class="fs-4">Tổng hợp các món ăn vặt hot nhất hiện nay, giao hàng siêu tốc.</p>
-        <button class="btn btn-warning btn-lg" type="button">Xem Thực Đơn</button>
+
+<div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-dark text-white rounded-5"
+     style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=1200') center/cover;">
+    <div class="col-md-6 p-lg-5 mx-auto my-5">
+        <h1 class="display-3 fw-bold">Ăn vặt cực đã!</h1>
+        <h3 class="fw-normal mb-4 text-warning">Giao hàng siêu tốc - Giá rẻ bất ngờ</h3>
+        <a class="btn btn-warning btn-lg fw-bold px-5 rounded-pill shadow-lg" href="#">Mua Ngay</a>
     </div>
 </div>
 
-<div class="container">
-    <h2 class="text-center my-4">Món Ăn Bán Chạy</h2>
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">🔥 Món hot hôm nay</h2>
+        <a href="#" class="btn btn-link text-danger fw-bold text-decoration-none">Xem tất cả <i class="fas fa-arrow-right"></i></a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
         <div class="col">
-            <div class="card h-100 shadow-sm">
-                <img src="https://images.unsplash.com/photo-1621236322951-f073527a4411?w=400" class="card-img-top" alt="Bánh tráng">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden product-card">
+                <div class="position-relative">
+                    <img src="https://images.unsplash.com/photo-1621236322951-f073527a4411?w=400" class="card-img-top" style="height: 200px; object-fit: cover;">
+                    <span class="position-absolute top-0 end-0 m-3 badge bg-danger rounded-pill">-10%</span>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">Bánh Tráng Trộn</h5>
-                    <p class="card-text text-danger fw-bold">25.000đ</p>
-                    <a href="#" class="btn btn-outline-primary">Thêm vào giỏ</a>
+                    <h5 class="card-title fw-bold">Bánh tráng trộn muối tắc</h5>
+                    <p class="text-danger fs-5 fw-bold mb-0">15.000đ <del class="text-muted fs-6 fw-normal">20.000đ</del></p>
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-3 px-3">
+                    <button class="btn btn-outline-danger w-100 rounded-pill fw-bold">
+                        <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden product-card">
+                <img src="https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400" class="card-img-top" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Khô gà lá chanh</h5>
+                    <p class="text-danger fs-5 fw-bold mb-0">35.000đ</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-3 px-3">
+                    <button class="btn btn-outline-danger w-100 rounded-pill fw-bold">
+                        <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ
+                    </button>
                 </div>
             </div>
         </div>
