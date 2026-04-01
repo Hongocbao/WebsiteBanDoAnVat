@@ -1,45 +1,24 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Trang Chủ";
 }
-
-<div class="hero-section text-center">
-    <div class="container">
-        <h1 class="display-4 fw-bold">Thế Giới Đồ Ăn Vặt <span style="color: #ff6b6b;">Siêu Ngon</span></h1>
-        <p class="lead">Hàng ngàn món ăn vặt hấp dẫn đang chờ bạn khám phá!</p>
-        <a href="#" class="btn btn-danger btn-lg px-5">Đặt hàng ngay</a>
+<div class="p-5 mb-4 bg-light rounded-3 text-center" style="background: url('https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=1000') center/cover; color: white;">
+    <div class="container-fluid py-5" style="background: rgba(0,0,0,0.5); border-radius: 15px;">
+        <h1 class="display-5 fw-bold">Ăn Vặt Foodie - Ăn Là Ghiền!</h1>
+        <p class="fs-4">Tổng hợp các món ăn vặt hot nhất hiện nay, giao hàng siêu tốc.</p>
+        <button class="btn btn-warning btn-lg" type="button">Xem Thực Đơn</button>
     </div>
 </div>
 
-<div class="container mt-5">
-    <h3 class="text-center mb-4">Món Ngon Nổi Bật</h3>
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card card-food h-100">
-                <img src="https://images.unsplash.com/photo-1621236322951-f073527a4411?q=80&w=500" class="card-img-top" alt="Bánh tráng trộn">
+<div class="container">
+    <h2 class="text-center my-4">Món Ăn Bán Chạy</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <img src="https://images.unsplash.com/photo-1621236322951-f073527a4411?w=400" class="card-img-top" alt="Bánh tráng">
                 <div class="card-body">
-                    <h5 class="card-title">Bánh Tráng Trộn Full Topping</h5>
+                    <h5 class="card-title">Bánh Tráng Trộn</h5>
                     <p class="card-text text-danger fw-bold">25.000đ</p>
-                    <button class="btn btn-outline-danger w-100">Thêm vào giỏ</button>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card card-food h-100">
-                <img src="https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?q=80&w=500" class="card-img-top" alt="Chân gà sả tắc">
-                <div class="card-body">
-                    <h5 class="card-title">Chân Gà Sả Tắc Cay Cay</h5>
-                    <p class="card-text text-danger fw-bold">45.000đ</p>
-                    <button class="btn btn-outline-danger w-100">Thêm vào giỏ</button>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card card-food h-100">
-                <img src="https://images.unsplash.com/photo-1559739511-33bc007671f0?q=80&w=500" class="card-img-top" alt="Trà sữa">
-                <div class="card-body">
-                    <h5 class="card-title">Trà Sữa Full Thạch</h5>
-                    <p class="card-text text-danger fw-bold">30.000đ</p>
-                    <button class="btn btn-outline-danger w-100">Thêm vào giỏ</button>
+                    <a href="#" class="btn btn-outline-primary">Thêm vào giỏ</a>
                 </div>
             </div>
         </div>
