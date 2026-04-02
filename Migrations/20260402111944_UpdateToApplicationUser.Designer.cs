@@ -12,8 +12,8 @@ using WebsiteBanDoAnVat.Data;
 namespace WebsiteBanDoAnVat.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260401161018_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260402111944_UpdateToApplicationUser")]
+    partial class UpdateToApplicationUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -170,10 +170,12 @@ namespace WebsiteBanDoAnVat.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -210,10 +212,12 @@ namespace WebsiteBanDoAnVat.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -243,7 +247,7 @@ namespace WebsiteBanDoAnVat.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("WebsiteBanDoAnVat.Models.Snack", b =>
+            modelBuilder.Entity("WebsiteBanDoAnVat.Models.MonAn", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -254,8 +258,14 @@ namespace WebsiteBanDoAnVat.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -268,7 +278,74 @@ namespace WebsiteBanDoAnVat.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Snacks");
+                    b.ToTable("MonAns");
+                });
+
+            modelBuilder.Entity("WebsiteBanDoAnVat.Models.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("WebsiteBanDoAnVat.Models.OrderDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MonAnId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MonAnId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("OrderDetails");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -322,10 +399,10 @@ namespace WebsiteBanDoAnVat.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("WebsiteBanDoAnVat.Models.Snack", b =>
+            modelBuilder.Entity("WebsiteBanDoAnVat.Models.MonAn", b =>
                 {
                     b.HasOne("WebsiteBanDoAnVat.Models.Category", "Category")
-                        .WithMany("Snacks")
+                        .WithMany("MonAns")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -333,9 +410,33 @@ namespace WebsiteBanDoAnVat.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("WebsiteBanDoAnVat.Models.OrderDetail", b =>
+                {
+                    b.HasOne("WebsiteBanDoAnVat.Models.MonAn", "MonAn")
+                        .WithMany()
+                        .HasForeignKey("MonAnId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WebsiteBanDoAnVat.Models.Order", "Order")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MonAn");
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("WebsiteBanDoAnVat.Models.Category", b =>
                 {
-                    b.Navigation("Snacks");
+                    b.Navigation("MonAns");
+                });
+
+            modelBuilder.Entity("WebsiteBanDoAnVat.Models.Order", b =>
+                {
+                    b.Navigation("OrderDetails");
                 });
 #pragma warning restore 612, 618
         }

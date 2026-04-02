@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebsiteBanDoAnVat.Data;
 using Microsoft.AspNetCore.Identity;
+using WebsiteBanDoAnVat.Models; // <<--- Đảm bảo có dòng này
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,18 +9,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. Cấu hình Identity (Đã tắt xác thực email để dễ test)
-builder.Services.AddDefaultIdentity<IdentityUser>(options => {
+// 2. Cấu hình Identity (Dùng ApplicationUser để lưu được MSSV)
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => {
     options.SignIn.RequireConfirmedAccount = false;
     options.Password.RequireDigit = false;
     options.Password.RequiredLength = 6;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
 })
+.AddRoles<IdentityRole>() // <<--- BẮT BUỘC PHẢI CÓ ĐỂ PHÂN QUYỀN
 .AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages(); // <<--- THÊM DÒNG NÀY
+builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
@@ -32,16 +34,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
-app.UseAuthentication(); // <<--- THÊM DÒNG NÀY (Bắt buộc trước Authorization)
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.MapRazorPages(); // <<--- THÊM DÒNG NÀY
+app.MapRazorPages();
 
 app.Run();

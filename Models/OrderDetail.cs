@@ -12,9 +12,9 @@ namespace WebsiteBanDoAnVat.Models
         [ForeignKey("OrderId")]
         public Order? Order { get; set; }
 
-        public int SnackId { get; set; }
-        [ForeignKey("SnackId")]
-        public Snack? Snack { get; set; }
+        public int MonAnId { get; set; } 
+        [ForeignKey("MonAnId")]
+        public MonAn? MonAn { get; set; }
 
         public int Quantity { get; set; }
 

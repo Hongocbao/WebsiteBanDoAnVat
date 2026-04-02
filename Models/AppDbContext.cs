@@ -8,7 +8,7 @@ namespace WebsiteBanDoAnVat.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
         public DbSet<Category> Categories { get; set; }
-        public DbSet<Snack> Snacks { get; set; }
+        public DbSet<MonAn> MonAns { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
 
