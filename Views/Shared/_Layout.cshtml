@@ -7,68 +7,247 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
+        :root {
+            --brand-red: #ff4757;
+            --dark-blue: #2f3542;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f8f9fa;
+            /* Đẩy nội dung xuống để không bị header fixed che mất */
+            padding-top: 140px;
         }
 
-        .navbar {
-            shadow: 0 2px 4px rgba(0,0,0,.1);
+        /* HEADER 2 TẦNG */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1030;
+            transition: transform 0.3s ease-in-out;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        .navbar-brand {
+        /* TẦNG 1: LOGO - SEARCH - USER & CART */
+        .header-main {
+            padding: 15px 0;
+            background: white;
+        }
+
+        .navbar-brand-custom {
             font-weight: 800;
-            color: #ff4757 !important;
-            font-size: 1.5rem;
+            color: var(--brand-red) !important;
+            font-size: 1.6rem;
+            text-decoration: none;
         }
 
+        .search-wrapper {
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .search-input-custom {
+            border-radius: 50px 0 0 50px !important;
+            border: 2px solid var(--brand-red);
+            padding-left: 20px;
+        }
+
+        .search-btn-custom {
+            border-radius: 0 50px 50px 0 !important;
+            background-color: var(--brand-red);
+            border: 2px solid var(--brand-red);
+            color: white;
+            padding: 0 20px;
+        }
+
+        /* Group Đăng nhập & Giỏ hàng */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-account-box {
+            background: #f1f2f6;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border: 1px solid #dfe4ea;
+        }
+
+            .user-account-box a {
+                color: var(--dark-blue);
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+                .user-account-box a:hover {
+                    color: var(--brand-red);
+                }
+
+        .cart-circle-btn {
+            width: 45px;
+            height: 45px;
+            background-color: var(--brand-red);
+            color: white !important;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: 0.3s;
+            box-shadow: 0 4px 8px rgba(255, 71, 87, 0.3);
+        }
+
+            .cart-circle-btn:hover {
+                transform: scale(1.1);
+                background-color: #ff6b81;
+            }
+
+        /* TẦNG 2: THANH MENU ĐỎ */
+        .header-navigation {
+            background-color: var(--brand-red);
+        }
+
+        .nav-menu-custom {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-link-custom {
+            color: white !important;
+            padding: 12px 20px;
+            display: block;
+            text-decoration: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+            .nav-link-custom:hover {
+                background-color: rgba(255,255,255,0.2);
+            }
+
+            .nav-link-custom.active {
+                background-color: white;
+                color: var(--brand-red) !important;
+            }
+
+        /* FOOTER */
         footer {
-            background: #2f3542;
+            background: var(--dark-blue);
             color: white;
             padding: 40px 0;
             margin-top: 50px;
         }
 
-        .nav-link {
-            font-weight: 500;
+            footer a {
+                color: white;
+                text-decoration: none;
+                transition: 0.3s;
+            }
+
+                footer a:hover {
+                    color: var(--brand-red);
+                }
+
+        .product-card .card-img-top {
+            transition: transform 0.3s ease-in-out;
         }
 
-            .nav-link:hover {
-                color: #ff4757 !important;
-            }
+        .product-card:hover .card-img-top {
+            transform: scale(1.08);
+        }
+
+        .offcanvas-cart .offcanvas-body {
+            padding: 1rem;
+        }
     </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+    <header id="mainHeader">
+        <div class="header-main">
+            <div class="container d-flex align-items-center justify-content-between">
+                <a class="navbar-brand-custom" asp-controller="Home" asp-action="Index">
                     <i class="fas fa-utensils me-2"></i>ĂN VẶT FOODIE
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarMain">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link active" asp-controller="Home" asp-action="Index">Trang Chủ</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="SanPham">Sản Phẩm</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="LienHe">Liên Hệ</a>
-                        </li>
-                    </ul>
-                    <partial name="_LoginPartial" />
+
+                <form class="search-wrapper d-none d-md-flex">
+                    <div class="input-group">
+                        <input class="form-control search-input-custom" type="search" placeholder="Tìm kiếm đồ ăn vặt cực ngon...">
+                        <button class="btn search-btn-custom" type="submit"><i class="fas fa-search"></i></button>
+                    </div>
+                </form>
+
+                <div class="header-actions">
+                    <a href="#" class="cart-circle-btn shadow-sm" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark" style="font-size: 0.65rem; border: 2px solid white;">
+                            0
+                        </span>
+                    </a>
+
+                    <div class="user-account-box d-none d-lg-flex shadow-sm bg-white">
+                        <partial name="_LoginPartial" />
+                    </div>
                 </div>
             </div>
-        </nav>
+        </div>
+
+        <div class="header-navigation">
+            <div class="container">
+                <ul class="nav-menu-custom">
+                    <li><a class="nav-link-custom @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" && ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                    <li><a class="nav-link-custom @(ViewContext.RouteData.Values["Action"]?.ToString() == "SanPham" ? "active" : "")" asp-controller="Home" asp-action="SanPham">Sản phẩm</a></li>
+                    <li><a class="nav-link-custom @(ViewContext.RouteData.Values["Action"]?.ToString() == "LienHe" ? "active" : "")" asp-controller="Home" asp-action="LienHe">Liên hệ</a></li>
+                    <li><a class="nav-link-custom @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Cart" ? "active" : "")" asp-controller="Home" asp-action="Cart">Giỏ hàng</a></li>
+                </ul>
+            </div>
+        </div>
     </header>
 
     <main role="main">
         @RenderBody()
     </main>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+        <div id="cartToast" class="toast align-items-center text-dark bg-white border-0 shadow-sm rounded-3" role="alert">
+            <div class="d-flex p-2">
+                <div class="toast-body fw-bold fs-6" id="toastMessage"></div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="offcanvas offcanvas-end shadow offcanvas-cart" tabindex="-1" id="cartOffcanvas">
+        <div class="offcanvas-header border-bottom bg-light">
+            <h5 class="offcanvas-title fw-bold text-danger">
+                <i class="fas fa-shopping-bag me-2"></i><span id="mini-cart-count">0</span> món ăn
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-0" id="mini-cart-items" style="overflow-y: auto;">
+        </div>
+        <div class="offcanvas-footer p-3 border-top bg-light">
+            <div class="d-flex justify-content-between text-muted mb-1" style="font-size: 0.9rem;">
+                <span>Tổng số sản phẩm:</span>
+                <span id="mini-cart-total-qty" class="fw-bold text-dark">0 sản phẩm</span>
+            </div>
+            <div class="d-flex justify-content-between fw-bold mb-3 fs-5">
+                <span>Tổng tiền:</span>
+                <span id="mini-cart-total" class="text-danger">0đ</span>
+            </div>
+            <a asp-controller="Home" asp-action="Cart" class="btn btn-danger w-100 rounded-pill fw-bold py-2 shadow-sm">XEM GIỎ HÀNG CHI TIẾT</a>
+        </div>
+    </div>
 
     <footer class="border-top">
         <div class="container">
@@ -78,16 +257,16 @@
                     <p class="small text-secondary">Chuyên cung cấp các loại đồ ăn vặt chất lượng, đảm bảo vệ sinh an toàn thực phẩm.</p>
                 </div>
                 <div class="col-md-4">
-                    <h5 class="fw-bold">Liên kết nhanh</h5>
+                    <h5 class="fw-bold text-white">Liên kết nhanh</h5>
                     <ul class="list-unstyled">
-                        <li><a href="#" class="text-white text-decoration-none small">Chính sách giao hàng</a></li>
-                        <li><a href="#" class="text-white text-decoration-none small">Điều khoản sử dụng</a></li>
+                        <li><a href="#" class="small">Chính sách giao hàng</a></li>
+                        <li><a href="#" class="small">Điều khoản sử dụng</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4 text-end">
-                    <h5 class="fw-bold">Theo dõi chúng tôi</h5>
-                    <a href="#" class="text-white me-3"><i class="fab fa-facebook fa-lg"></i></a>
-                    <a href="#" class="text-white"><i class="fab fa-tiktok fa-lg"></i></a>
+                    <h5 class="fw-bold text-white">Theo dõi chúng tôi</h5>
+                    <a href="#" class="me-3"><i class="fab fa-facebook fa-lg text-white"></i></a>
+                    <a href="#"><i class="fab fa-tiktok fa-lg text-white"></i></a>
                 </div>
             </div>
             <hr>
@@ -96,6 +275,148 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // 1. XỬ LÝ ẨN HIỆN HEADER KHI CUỘN
+        let lastScrollTop = 0;
+        const header = document.getElementById('mainHeader');
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop && scrollTop > 150) {
+                header.style.transform = "translateY(-100%)";
+            } else {
+                header.style.transform = "translateY(0)";
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        });
+
+        // 2. LOGIC GIỎ HÀNG VÀ ĐỒNG BỘ
+        document.addEventListener("DOMContentLoaded", function () {
+            let cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
+            updateCartUI();
+
+            document.body.addEventListener('click', function (e) {
+                // Nút Thêm vào giỏ
+                const addBtn = e.target.closest('.add-to-cart-btn');
+                if (addBtn) {
+                    const product = {
+                        id: addBtn.getAttribute('data-id'),
+                        name: addBtn.getAttribute('data-name'),
+                        price: parseFloat(addBtn.getAttribute('data-price')),
+                        image: addBtn.getAttribute('data-image'),
+                        quantity: 1
+                    };
+                    const existingItem = cart.find(item => item.id === product.id);
+                    if (!existingItem) cart.push(product);
+                    else existingItem.quantity += 1;
+
+                    saveAndRefresh();
+                    showToast(`<i class="fas fa-check-circle text-success me-2"></i> Đã thêm <b>${product.name}</b> vào giỏ hàng!`);
+                }
+
+                // Nút tăng (+)
+                const incBtn = e.target.closest('.increase-btn');
+                if (incBtn) {
+                    const id = incBtn.getAttribute('data-id');
+                    const item = cart.find(i => i.id === id);
+                    if (item) { item.quantity += 1; saveAndRefresh(); }
+                }
+
+                // Nút giảm (-)
+                const decBtn = e.target.closest('.decrease-btn');
+                if (decBtn) {
+                    const id = decBtn.getAttribute('data-id');
+                    const item = cart.find(i => i.id === id);
+                    if (item) {
+                        item.quantity -= 1;
+                        if (item.quantity <= 0) {
+                            cart = cart.filter(i => i.id !== id);
+                            showToast(`<i class="fas fa-info-circle text-danger me-2"></i> Đã xóa sản phẩm khỏi giỏ hàng.`);
+                        }
+                        saveAndRefresh();
+                    }
+                }
+
+                // Nút xóa hẳn (x) trong Offcanvas
+                const removeBtn = e.target.closest('.remove-item-btn');
+                if (removeBtn) {
+                    const idx = removeBtn.getAttribute('data-index');
+                    const removedItem = cart[idx];
+                    cart.splice(idx, 1);
+                    saveAndRefresh();
+                    showToast(`<i class="fas fa-trash text-danger me-2"></i> Đã bỏ <b>${removedItem.name}</b>.`);
+                }
+            });
+
+            function saveAndRefresh() {
+                localStorage.setItem('anvat_cart', JSON.stringify(cart));
+                updateCartUI();
+            }
+
+            function updateCartUI() {
+                // Icon hiện số loại món
+                document.getElementById('cart-badge').innerText = cart.length;
+                document.getElementById('mini-cart-count').innerText = cart.length;
+
+                // Footer Offcanvas hiện tổng cái
+                const totalQty = cart.reduce((sum, i) => sum + i.quantity, 0);
+                document.getElementById('mini-cart-total-qty').innerText = totalQty + " sản phẩm";
+
+                // Đồng bộ nút ở trang chủ
+                document.querySelectorAll('[class*="product-action-"]').forEach(container => {
+                    const idMatch = container.className.match(/product-action-(\d+)/);
+                    if (idMatch) {
+                        const id = idMatch[1];
+                        const item = cart.find(i => i.id == id);
+                        const addBtn = container.querySelector('.add-to-cart-btn');
+                        const qtyControl = container.querySelector('.quantity-control');
+                        if (item) {
+                            addBtn?.classList.add('d-none');
+                            qtyControl?.classList.replace('d-none', 'd-flex');
+                            const qtySpan = container.querySelector(`.item-qty-${id}`);
+                            if(qtySpan) qtySpan.innerText = item.quantity;
+                        } else {
+                            addBtn?.classList.remove('d-none');
+                            qtyControl?.classList.replace('d-flex', 'd-none');
+                        }
+                    }
+                });
+
+                // Render danh sách Offcanvas
+                const cartItemsContainer = document.getElementById('mini-cart-items');
+                let totalMoney = 0;
+                if (cart.length === 0) {
+                    cartItemsContainer.innerHTML = '<div class="p-5 text-center text-muted">Giỏ hàng của bạn đang trống</div>';
+                } else {
+                    cartItemsContainer.innerHTML = cart.map((item, index) => {
+                        totalMoney += item.price * item.quantity;
+                        return `
+                        <div class="d-flex align-items-center p-3 border-bottom position-relative bg-white">
+                            <img src="${item.image}" class="rounded-3 border me-3" style="width: 70px; height: 70px; object-fit: cover;">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1 fw-bold text-dark small">${item.name}</h6>
+                                <div class="text-danger fw-bold small">${item.price.toLocaleString('vi-VN')}đ</div>
+                                <div class="d-flex align-items-center mt-2 border rounded-pill d-inline-flex bg-light">
+                                    <button class="btn btn-sm decrease-btn border-0" data-id="${item.id}" style="width: 25px;">-</button>
+                                    <span class="px-2 fw-bold text-dark" style="font-size: 0.8rem;">${item.quantity}</span>
+                                    <button class="btn btn-sm increase-btn border-0" data-id="${item.id}" style="width: 25px;">+</button>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm text-muted remove-item-btn" data-index="${index}"><i class="fas fa-times"></i></button>
+                        </div>`;
+                    }).join('');
+                }
+                document.getElementById('mini-cart-total').innerText = totalMoney.toLocaleString('vi-VN') + 'đ';
+            }
+
+            function showToast(messageHtml) {
+                const toastEl = document.getElementById('cartToast');
+                document.getElementById('toastMessage').innerHTML = messageHtml;
+                new bootstrap.Toast(toastEl, { delay: 3000 }).show();
+            }
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

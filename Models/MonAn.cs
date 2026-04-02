@@ -19,6 +19,11 @@ namespace WebsiteBanDoAnVat.Models
         public string? Description { get; set; }
 
         public bool IsAvailable { get; set; } = true;
+        public bool IsBestSeller { get; set; } = false; // Đánh dấu sản phẩm bán chạy
+
+        public int ViewCount { get; set; } = 0; // Lượt xem
+
+        public int StockQuantity { get; set; } = 100; // Số lượng tồn kho
 
         // Liên kết với loại món (Category)
         public int CategoryId { get; set; }

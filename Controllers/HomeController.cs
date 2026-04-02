@@ -1,22 +1,43 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore; // Thêm thư viện này để dùng ToListAsync()
 using WebsiteBanDoAnVat.Models;
+using WebsiteBanDoAnVat.Data;
 
 namespace WebsiteBanDoAnVat.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly AppDbContext _context; // Bổ sung AppDbContext để gọi Database
 
-        public HomeController(ILogger<HomeController> logger)
+        // Inject cả Logger và DbContext vào Constructor
+        public HomeController(ILogger<HomeController> logger, AppDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
-        // 1. Trang Chủ
-        public IActionResult Index()
+        // 1. Trang Chủ (Đã cập nhật để lấy dữ liệu thật từ SQL)
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var viewModel = new HomeViewModel();
+
+            // Lấy 4 món bán chạy (IsAvailable = true và IsBestSeller = true)
+            viewModel.BestSellers = await _context.MonAns
+                .Where(m => m.IsAvailable && m.IsBestSeller)
+                .Take(4)
+                .ToListAsync();
+
+            // Lấy 3 món mới nhất (IsAvailable = true, sắp xếp Id giảm dần)
+            viewModel.NewProducts = await _context.MonAns
+                .Where(m => m.IsAvailable)
+                .OrderByDescending(m => m.Id)
+                .Take(3)
+                .ToListAsync();
+
+            // Truyền dữ liệu sang View
+            return View(viewModel);
         }
 
         // 2. Trang Giới Thiệu
@@ -42,7 +63,10 @@ namespace WebsiteBanDoAnVat.Controllers
         {
             return View();
         }
-
+        public IActionResult Cart()
+        {
+            return View();
+        }
         public IActionResult Privacy()
         {
             return View();

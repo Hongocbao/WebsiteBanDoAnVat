@@ -1,0 +1,243 @@
+﻿@{
+    ViewData["Title"] = "Giỏ Hàng Của Bạn";
+}
+
+<style>
+    /* Tuỳ chỉnh riêng cho trang Giỏ hàng */
+    .cart-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        border: none;
+    }
+
+    .cart-header-text {
+        font-size: 0.9rem;
+        color: #7f8fa6;
+        font-weight: 600;
+    }
+
+    .qty-btn {
+        background: transparent;
+        border: none;
+        color: #7f8fa6;
+        font-weight: bold;
+        padding: 0 10px;
+    }
+
+        .qty-btn:hover {
+            color: #ff4757;
+        }
+
+    .promo-input {
+        border-radius: 8px 0 0 8px;
+        border: 1px solid #dcdde1;
+        box-shadow: none;
+    }
+
+    .promo-btn {
+        border-radius: 0 8px 8px 0;
+        background-color: #f1f2f6;
+        border: 1px solid #dcdde1;
+        border-left: none;
+        color: #ff4757;
+        font-weight: bold;
+    }
+</style>
+
+<div class="container my-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none" style="color: #ff4757;">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Giỏ hàng</li>
+        </ol>
+    </nav>
+
+    <div id="empty-cart-msg" class="text-center py-5 d-none cart-card my-5">
+        <img src="https://cdn-icons-png.flaticon.com/512/11329/11329060.png" alt="Empty Cart" style="width: 150px; opacity: 0.5;" class="mb-3">
+        <h4 class="text-muted fw-bold">Giỏ hàng của bạn đang trống</h4>
+        <p class="text-secondary">Hãy quay lại trang chủ và chọn cho mình những món ăn vặt thật ngon nhé!</p>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-danger rounded-pill px-5 py-2 mt-2 fw-bold shadow-sm">Tiếp tục mua sắm</a>
+    </div>
+
+    <div class="row g-4" id="cart-content">
+        <div class="col-lg-8">
+            <div class="cart-card p-4 h-100">
+                <div class="row pb-3 border-bottom cart-header-text d-none d-md-flex">
+                    <div class="col-5" id="total-items-label">Tất cả 0 sản phẩm</div>
+                    <div class="col-2 text-center">Đơn giá</div>
+                    <div class="col-2 text-center">Số lượng</div>
+                    <div class="col-3 text-center">Thành tiền</div>
+                </div>
+
+                <div id="cart-page-items">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="cart-card p-4 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 text-dark">Giao tới</h6>
+                    <a href="#" class="text-decoration-none small fw-bold" style="color: #ff4757;" data-bs-toggle="modal" data-bs-target="#addressModal">Thêm địa chỉ</a>
+                </div>
+                <div class="bg-light p-3 rounded-3 text-center border">
+                    <span class="fw-bold text-muted" style="font-size: 0.9rem;">Vui lòng thêm địa chỉ</span>
+                </div>
+            </div>
+
+            <div class="cart-card p-4 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 text-dark">Khuyến mãi</h6>
+                </div>
+                <div class="input-group">
+                    <input type="text" class="form-control promo-input bg-light" placeholder="Nhập mã khuyến mãi">
+                    <button class="btn promo-btn">Áp dụng</button>
+                </div>
+            </div>
+
+            <div class="cart-card p-4">
+                <div class="d-flex justify-content-between mb-2" style="font-size: 0.95rem;">
+                    <span class="text-muted">Tạm tính</span>
+                    <span id="cart-subtotal" class="fw-bold text-dark">0 đ</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2" style="font-size: 0.95rem;">
+                    <span class="text-muted">Phí vận chuyển</span>
+                    <span class="fw-bold text-dark">0 đ</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3" style="font-size: 0.95rem;">
+                    <span class="text-muted">Giảm giá</span>
+                    <span class="fw-bold text-primary">0 đ</span>
+                </div>
+                <hr class="text-muted">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="fw-bold text-dark">Tổng tiền</span>
+                    <h5 id="cart-total" class="fw-bold mb-0" style="color: #ff4757;">0 đ</h5>
+                </div>
+                <div class="text-end text-muted mb-4" style="font-size: 0.75rem;">(Đã bao gồm VAT nếu có)</div>
+
+                <button class="btn btn-danger w-100 rounded-pill fw-bold py-2 shadow-sm fs-6" id="checkout-btn-text">Mua hàng (0)</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0 mt-2">
+                <h5 class="modal-title w-100 text-center fw-bold" id="addressModalLabel" style="color: #ff4757;">Thêm địa chỉ</h5>
+                <button type="button" class="btn-close position-absolute end-0 me-3" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="addressForm">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control rounded-3" placeholder="Tên người nhận" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="tel" class="form-control rounded-3" placeholder="Số điện thoại" required>
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control rounded-3" placeholder="Tỉnh / Thành phố" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control rounded-3" placeholder="Phường / Xã" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <input type="text" class="form-control rounded-3" placeholder="Địa chỉ cụ thể" required>
+                    </div>
+
+                    <button type="button" class="btn btn-danger w-100 rounded-pill fw-bold py-2 shadow-sm fs-6" data-bs-dismiss="modal">Xác nhận</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            renderCartPage();
+
+            // Hàm vẽ giao diện trang Giỏ hàng
+            function renderCartPage() {
+                const cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
+                const container = document.getElementById('cart-page-items');
+                const emptyMsg = document.getElementById('empty-cart-msg');
+                const cartContent = document.getElementById('cart-content');
+                const totalItemsLabel = document.getElementById('total-items-label');
+
+                // Nếu giỏ hàng trống -> Ẩn chia cột, Hiện thông báo trống
+                if (cart.length === 0) {
+                    cartContent.classList.add('d-none');
+                    emptyMsg.classList.remove('d-none');
+                    return;
+                }
+
+                // Có hàng -> Hiện chia cột
+                cartContent.classList.remove('d-none');
+                emptyMsg.classList.add('d-none');
+
+                // Cập nhật dòng "Tất cả x sản phẩm"
+                const totalQty = cart.reduce((sum, i) => sum + i.quantity, 0);
+                totalItemsLabel.innerText = `Tất cả ${cart.length} sản phẩm`;
+
+                // Render danh sách món
+                let totalMoney = 0;
+                container.innerHTML = cart.map((item, index) => {
+                    const lineTotal = item.price * item.quantity;
+                    totalMoney += lineTotal;
+                    return `
+                    <div class="row align-items-center py-4 border-bottom">
+                        <div class="col-12 col-md-5 d-flex align-items-center mb-3 mb-md-0">
+                            <img src="${item.image}" class="rounded-3 border me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                            <div>
+                                <h6 class="fw-bold mb-2 text-dark" style="font-size: 0.95rem;">${item.name}</h6>
+                                <select class="form-select form-select-sm text-muted bg-light border-0 shadow-none" style="width: 100px; font-size: 0.8rem;">
+                                    <option>500gr</option>
+                                    <option>1kg</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-4 col-md-2 fw-bold text-dark text-md-center" style="font-size: 0.95rem;">
+                            <span class="d-md-none text-muted fw-normal me-2">Giá:</span>${item.price.toLocaleString('vi-VN')} đ
+                        </div>
+
+                        <div class="col-4 col-md-2 d-flex justify-content-md-center">
+                            <div class="d-flex align-items-center border rounded-pill px-1 py-1 bg-white shadow-sm">
+                                <button class="qty-btn decrease-btn" data-id="${item.id}">-</button>
+                                <span class="px-2 fw-bold text-dark" style="font-size: 0.9rem;">${item.quantity}</span>
+                                <button class="qty-btn increase-btn" data-id="${item.id}">+</button>
+                            </div>
+                        </div>
+
+                        <div class="col-4 col-md-3 d-flex justify-content-between justify-content-md-end align-items-center">
+                            <span class="fw-bold" style="color: #ff4757; font-size: 1.05rem;">
+                                ${lineTotal.toLocaleString('vi-VN')} đ
+                            </span>
+                            <button class="btn border-0 text-muted remove-item-btn ms-3 fs-5" data-index="${index}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                // Cập nhật phần Tính tiền bên phải
+                document.getElementById('cart-subtotal').innerText = totalMoney.toLocaleString('vi-VN') + ' đ';
+                document.getElementById('cart-total').innerText = totalMoney.toLocaleString('vi-VN') + ' đ';
+                document.getElementById('checkout-btn-text').innerText = `Mua hàng (${totalQty})`;
+            }
+
+            // Lắng nghe sự kiện click trên toàn body (Dùng chung bộ nút với Layout)
+            // Đặt setTimeout để đợi logic trong _Layout.cshtml cập nhật LocalStorage xong rồi mới vẽ lại trang này
+            document.body.addEventListener('click', function(e) {
+                if (e.target.closest('.increase-btn') || e.target.closest('.decrease-btn') || e.target.closest('.remove-item-btn') || e.target.closest('.add-to-cart-btn')) {
+                    setTimeout(renderCartPage, 50);
+                }
+            });
+        });
+    </script>
+}
