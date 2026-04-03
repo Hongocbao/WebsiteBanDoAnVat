@@ -12,8 +12,8 @@ using WebsiteBanDoAnVat.Data;
 namespace WebsiteBanDoAnVat.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260402103611_InitialCreateV2")]
-    partial class InitialCreateV2
+    [Migration("20260403092834_UpdateMonAnFields")]
+    partial class UpdateMonAnFields
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -245,6 +245,26 @@ namespace WebsiteBanDoAnVat.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Khô gà, khô bò các loại",
+                            Name = "Đồ Khô"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Bánh tráng trộn, nướng",
+                            Name = "Bánh Tráng"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Kẹo, bánh ngọt, trái cây sấy",
+                            Name = "Ăn Vặt Ngọt"
+                        });
                 });
 
             modelBuilder.Entity("WebsiteBanDoAnVat.Models.MonAn", b =>
@@ -267,6 +287,9 @@ namespace WebsiteBanDoAnVat.Migrations
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsBestSeller")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -274,11 +297,103 @@ namespace WebsiteBanDoAnVat.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
                     b.ToTable("MonAns");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CategoryId = 1,
+                            ImageUrl = "https://images.unsplash.com/photo-1621236322951-f073527a4411?w=400",
+                            IsAvailable = true,
+                            IsBestSeller = true,
+                            Name = "Khô Bò Giòn Cay Hồng Ngự",
+                            Price = 380000m,
+                            StockQuantity = 50,
+                            ViewCount = 0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CategoryId = 2,
+                            ImageUrl = "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400",
+                            IsAvailable = true,
+                            IsBestSeller = true,
+                            Name = "Bánh Tráng Muối Bò Premium",
+                            Price = 110000m,
+                            StockQuantity = 100,
+                            ViewCount = 0
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CategoryId = 2,
+                            ImageUrl = "https://images.unsplash.com/photo-1621236322951-f073527a4411?w=400",
+                            IsAvailable = true,
+                            IsBestSeller = true,
+                            Name = "Bánh Tráng Tóp Mỡ",
+                            Price = 130000m,
+                            StockQuantity = 80,
+                            ViewCount = 0
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CategoryId = 1,
+                            ImageUrl = "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400",
+                            IsAvailable = true,
+                            IsBestSeller = true,
+                            Name = "Khô Bò Vụn",
+                            Price = 320000m,
+                            StockQuantity = 30,
+                            ViewCount = 0
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CategoryId = 3,
+                            ImageUrl = "https://images.unsplash.com/photo-1621236322951-f073527a4411?w=400",
+                            IsAvailable = true,
+                            IsBestSeller = false,
+                            Name = "Chùm Ruột Muối Tắc",
+                            Price = 120000m,
+                            StockQuantity = 200,
+                            ViewCount = 0
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CategoryId = 3,
+                            ImageUrl = "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400",
+                            IsAvailable = true,
+                            IsBestSeller = false,
+                            Name = "Kẹo Dừa Sáp Bọc Xíu",
+                            Price = 110000m,
+                            StockQuantity = 150,
+                            ViewCount = 0
+                        },
+                        new
+                        {
+                            Id = 7,
+                            CategoryId = 1,
+                            ImageUrl = "https://images.unsplash.com/photo-1621236322951-f073527a4411?w=400",
+                            IsAvailable = true,
+                            IsBestSeller = false,
+                            Name = "Mực Rim Me Sấy Mè",
+                            Price = 150000m,
+                            StockQuantity = 40,
+                            ViewCount = 0
+                        });
                 });
 
             modelBuilder.Entity("WebsiteBanDoAnVat.Models.Order", b =>

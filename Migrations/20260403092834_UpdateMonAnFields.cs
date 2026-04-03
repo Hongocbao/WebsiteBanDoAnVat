@@ -5,7 +5,7 @@
 namespace WebsiteBanDoAnVat.Migrations
 {
     /// <inheritdoc />
-    public partial class KhoiTaoLaiHeThong : Migration
+    public partial class UpdateMonAnFields : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

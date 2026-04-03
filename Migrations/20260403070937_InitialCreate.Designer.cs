@@ -12,8 +12,8 @@ using WebsiteBanDoAnVat.Data;
 namespace WebsiteBanDoAnVat.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260402173349_UpdateMonAnAndSeedData")]
-    partial class UpdateMonAnAndSeedData
+    [Migration("20260403070937_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

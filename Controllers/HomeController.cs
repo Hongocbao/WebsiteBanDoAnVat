@@ -47,9 +47,29 @@ namespace WebsiteBanDoAnVat.Controllers
         }
 
         // 3. Trang Sản Phẩm
-        public IActionResult SanPham()
+        // Thêm chữ "async" và đổi kiểu trả về thành Task<IActionResult>
+        public async Task<IActionResult> SanPham(string filter)
         {
-            return View();
+            var query = _context.MonAns.AsQueryable();
+
+            switch (filter)
+            {
+                case "banchay":
+                    query = query.Where(m => m.IsBestSeller == true);
+                    break;
+                case "moinhat":
+                    query = query.OrderByDescending(m => m.Id);
+                    break;
+                case "hot":
+                    query = query.OrderByDescending(m => m.ViewCount);
+                    break;
+                case "giamgia":
+                    query = query.Where(m => m.Price < 50000);
+                    break;
+            }
+
+            var dsMonAn = await query.ToListAsync();
+            return View(dsMonAn);
         }
 
         // 4. Trang Tin Tức

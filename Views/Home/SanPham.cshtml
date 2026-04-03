@@ -1,13 +1,86 @@
-﻿<!DOCTYPE html>
+﻿@model IEnumerable<WebsiteBanDoAnVat.Models.MonAn>
 
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>@ViewBag.Title</title>
-</head>
-<body>
-    <div>
-        
+@{
+    ViewData["Title"] = "Danh sách món ăn";
+}
+<div class="container mt-3">
+    <div class="d-flex flex-wrap gap-2 mb-4 justify-content-center">
+        <a asp-action="SanPham" asp-route-filter="" class="btn btn-outline-secondary rounded-pill px-4">Tất cả</a>
+        <a asp-action="SanPham" asp-route-filter="banchay" class="btn btn-outline-danger rounded-pill px-4">🔥 Bán chạy</a>
+        <a asp-action="SanPham" asp-route-filter="moinhat" class="btn btn-outline-primary rounded-pill px-4">✨ Mới nhất</a>
+        <a asp-action="SanPham" asp-route-filter="hot" class="btn btn-outline-warning rounded-pill px-4">🌟 Đang HOT</a>
+        <a asp-action="SanPham" asp-route-filter="giamgia" class="btn btn-outline-success rounded-pill px-4">💸 Giảm giá</a>
     </div>
-</body>
-</html>
+
+    <h3 class="text-center mb-4 fw-bold">@ViewBag.TitlePage</h3>
+
+</div>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-uppercase fw-bold" style="color: #ff4d4d; border-left: 5px solid #ff4d4d; padding-left: 15px;">
+            Thực Đơn Ăn Vặt
+        </h2>
+        <span class="badge bg-danger rounded-pill">@Model.Count() món đang mở bán</span>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm product-card" style="border-radius: 20px; overflow: hidden; transition: all 0.3s ease;">
+                    <div class="position-relative overflow-hidden" style="height: 220px;">
+                        <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "/images/no-image.jpg" : item.ImageUrl)"
+                             class="card-img-top w-100 h-100"
+                             style="object-fit: cover;"
+                             alt="@item.Name">
+
+                        @if (item.IsBestSeller)
+                        {
+                            <span class="position-absolute top-0 start-0 bg-warning text-dark fw-bold px-3 py-1 m-2 rounded-pill" style="font-size: 12px;">
+                                🔥 Bán chạy
+                            </span>
+                        }
+                    </div>
+
+                    <div class="card-body d-flex flex-column justify-content-between px-3">
+                        <div>
+                            <h6 class="card-title fw-bold mb-1 text-truncate" title="@item.Name">@item.Name</h6>
+                            <p class="small text-muted mb-2 text-truncate-2">@item.Description</p>
+                        </div>
+
+                        <div class="mt-2">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="fs-5 fw-bold text-danger">@item.Price.ToString("N0")đ</span>
+                                <span class="small text-muted"><i class="far fa-eye"></i> @item.ViewCount</span>
+                            </div>
+
+                            <a href="#" class="btn w-100 fw-bold rounded-pill shadow-sm py-2"
+                               style="background: linear-gradient(45deg, #ff4d4d, #ff8080); color: white; border: none;">
+                                <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    }
+
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+        transform: scale(1.02);
+    }
+</style>
