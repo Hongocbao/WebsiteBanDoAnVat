@@ -1,0 +1,67 @@
+﻿/* Hero Section (Banner đầu trang) */
+.home-hero {
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=1200');
+    background-size: cover;
+    background-position: center;
+}
+
+/* Các thẻ Icon dịch vụ */
+.service-icon-text {
+    font-size: 0.75rem;
+}
+
+/* Card sản phẩm chung */
+.product-card {
+    transition: transform 0.3s ease, shadow 0.3s ease;
+}
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+
+.product-img {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Card sản phẩm nhỏ ở mục danh mục */
+.product-img-sm {
+    height: 180px;
+    object-fit: cover;
+}
+
+/* Banner "MỚI CẬP NHẬT" */
+.banner-new-update {
+    background-color: #fce7a1;
+    min-height: 250px;
+}
+
+.text-new {
+    font-size: 2.5rem;
+}
+
+.text-update {
+    font-size: 1.8rem;
+    -webkit-text-stroke: 1px white;
+}
+
+/* Sidebar & Phân loại */
+.category-icon-small {
+    font-size: 0.8rem;
+}
+
+/* Điều khiển số lượng */
+.btn-qty {
+    width: 30px;
+}
+
+.btn-qty-sm {
+    width: 25px;
+}
+
+.btn-cart-circle {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+}
