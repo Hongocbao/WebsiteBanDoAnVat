@@ -16,19 +16,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
-using WebsiteBanDoAnVat.Models; 
+using WebsiteBanDoAnVat.Models;
 
 namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
-        private readonly SignInManager<ApplicationUser> _signInManager; // Đổi thành ApplicationUser
-        private readonly UserManager<ApplicationUser> _userManager;   // Đổi thành ApplicationUser
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserStore<ApplicationUser> _userStore;
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
-        private readonly RoleManager<IdentityRole> _roleManager; // Thêm RoleManager
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
@@ -36,7 +36,7 @@ namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender,
-            RoleManager<IdentityRole> roleManager) // Inject RoleManager
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -92,7 +92,6 @@ namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
-                // Lưu thêm thông tin MSSV vào ApplicationUser
                 user.MaSinhVien = Input.StudentId;
                 user.IsSinhVien = (Input.UserRole == "Student");
 
@@ -102,13 +101,11 @@ namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("Đã tạo tài khoản mới thành công.");
 
-                    // --- LOGIC GÁN QUYỀN TỰ ĐỘNG ---
                     if (!await _roleManager.RoleExistsAsync(Input.UserRole))
                     {
                         await _roleManager.CreateAsync(new IdentityRole(Input.UserRole));
                     }
                     await _userManager.AddToRoleAsync(user, Input.UserRole);
-                    // ------------------------------
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
