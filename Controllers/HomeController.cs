@@ -23,17 +23,26 @@ namespace WebsiteBanDoAnVat.Controllers
         {
             var viewModel = new HomeViewModel();
 
-            // Lấy 4 món bán chạy (IsAvailable = true và IsBestSeller = true)
+            // 1. Lấy 4 món bán chạy (Giữ nguyên logic của Bảo)
             viewModel.BestSellers = await _context.MonAns
                 .Where(m => m.IsAvailable && m.IsBestSeller)
                 .Take(4)
                 .ToListAsync();
 
-            // Lấy 3 món mới nhất (IsAvailable = true, sắp xếp Id giảm dần)
+            // 2. Lấy 3 món mới nhất (Giữ nguyên logic của Bảo)
             viewModel.NewProducts = await _context.MonAns
                 .Where(m => m.IsAvailable)
                 .OrderByDescending(m => m.Id)
                 .Take(3)
+                .ToListAsync();
+
+            // 3. THÊM MỚI: Lấy danh mục để hiển thị ở Sidebar bên dưới
+            // (Cái này chỉ thêm vào chứ không xóa gì cũ nên không sợ lỗi)
+            viewModel.Categories = await _context.Categories.ToListAsync();
+
+            // 4. THÊM MỚI: Lấy danh sách tất cả món ăn (hiện ở phần dưới cùng)
+            viewModel.AllProducts = await _context.MonAns
+                .Where(m => m.IsAvailable)
                 .ToListAsync();
 
             // Truyền dữ liệu sang View

@@ -41,7 +41,25 @@ body {
     }
 }
 
-.dropdown-item:hover {
-    background-color: #ff4d4d;
-    color: white;
+<style >
+/* Dán đoạn code có @media và @keyframes vào đây */
+@@media (max-width: 768px) {
+    .nav-menu-custom
+
+{
+    display: none;
 }
+
+}
+
+@@keyframes slideIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+</style >
