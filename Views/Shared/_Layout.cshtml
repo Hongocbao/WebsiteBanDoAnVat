@@ -1,22 +1,35 @@
 ﻿<!DOCTYPE html>
+
 <html lang="vi">
+
 <head>
+
     <meta charset="utf-8" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>@ViewData["Title"] - Ăn Vặt Foodie</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
     <style>
+
         :root {
             --brand-red: #ff4757;
             --dark-blue: #2f3542;
         }
+
+
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f8f9fa;
             padding-top: 140px;
         }
+
+
 
         header {
             position: fixed;
@@ -28,10 +41,14 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
+
+
         .header-main {
             padding: 15px 0;
             background: white;
         }
+
+
 
         .navbar-brand-custom {
             font-weight: 800;
@@ -40,16 +57,22 @@
             text-decoration: none;
         }
 
+
+
         .search-wrapper {
             max-width: 500px;
             width: 100%;
         }
+
+
 
         .search-input-custom {
             border-radius: 50px 0 0 50px !important;
             border: 2px solid var(--brand-red);
             padding-left: 20px;
         }
+
+
 
         .search-btn-custom {
             border-radius: 0 50px 50px 0 !important;
@@ -59,11 +82,15 @@
             padding: 0 20px;
         }
 
+
+
         .header-actions {
             display: flex;
             align-items: center;
             gap: 15px;
         }
+
+
 
         .user-account-box {
             background: #f1f2f6;
@@ -76,15 +103,21 @@
             border: 1px solid #dfe4ea;
         }
 
+
+
             .user-account-box a {
                 color: var(--dark-blue);
                 text-decoration: none;
                 font-weight: 600;
             }
 
+
+
                 .user-account-box a:hover {
                     color: var(--brand-red);
                 }
+
+
 
         .cart-circle-btn {
             width: 45px;
@@ -100,14 +133,20 @@
             box-shadow: 0 4px 8px rgba(255, 71, 87, 0.3);
         }
 
+
+
             .cart-circle-btn:hover {
                 transform: scale(1.1);
                 background-color: #ff6b81;
             }
 
+
+
         .header-navigation {
             background-color: var(--brand-red);
         }
+
+
 
         .nav-menu-custom {
             display: flex;
@@ -115,6 +154,8 @@
             margin: 0;
             padding: 0;
         }
+
+
 
         .nav-link-custom {
             color: white !important;
@@ -127,14 +168,20 @@
             transition: 0.2s;
         }
 
+
+
             .nav-link-custom:hover {
                 background-color: rgba(255,255,255,0.2);
             }
+
+
 
             .nav-link-custom.active {
                 background-color: white;
                 color: var(--brand-red) !important;
             }
+
+
 
         .dropdown-menu-custom {
             border: none;
@@ -144,6 +191,8 @@
             padding: 10px 0;
         }
 
+
+
         .dropdown-item-custom {
             font-weight: 500;
             padding: 10px 25px;
@@ -151,11 +200,15 @@
             color: var(--dark-blue);
         }
 
+
+
             .dropdown-item-custom:hover {
                 background-color: #fff1f2;
                 color: var(--brand-red);
                 padding-left: 30px;
             }
+
+
 
         footer {
             background: var(--dark-blue);
@@ -164,174 +217,347 @@
             margin-top: 50px;
         }
 
+
+
             footer a {
                 color: white;
                 text-decoration: none;
                 transition: 0.3s;
             }
 
+
+
                 footer a:hover {
                     color: var(--brand-red);
                 }
+
     </style>
+
     @await RenderSectionAsync("Styles", required: false)
+
 </head>
+
 <body>
+
     <header id="mainHeader">
+
         <div class="header-main">
+
             <div class="container d-flex align-items-center justify-content-between">
+
                 <a class="navbar-brand-custom" asp-controller="Home" asp-action="Index">
+
                     <i class="fas fa-utensils me-2"></i>ĂN VẶT FOODIE
+
                 </a>
 
+
+
                 <form class="search-wrapper d-none d-md-flex">
+
                     <div class="input-group">
+
                         <input class="form-control search-input-custom" type="search" placeholder="Tìm kiếm đồ ăn vặt cực ngon...">
+
                         <button class="btn search-btn-custom" type="submit"><i class="fas fa-search"></i></button>
+
                     </div>
+
                 </form>
 
+
+
                 <div class="header-actions">
+
                     <a href="#" class="cart-circle-btn shadow-sm" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">
+
                         <i class="fas fa-shopping-bag"></i>
+
                         <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark" style="font-size: 0.65rem; border: 2px solid white;">0</span>
+
                     </a>
+
                     <div class="user-account-box d-none d-lg-flex shadow-sm bg-white">
+
                         <partial name="_LoginPartial" />
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
+
 
         <div class="header-navigation">
+
             <div class="container">
+
                 <ul class="nav-menu-custom">
+
                     <li><a class="nav-link-custom @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")" asp-controller="Home" asp-action="Index">Trang chủ</a></li>
 
+
+
                     <li class="nav-item dropdown">
+
                         <a class="nav-link-custom dropdown-toggle @(ViewContext.RouteData.Values["Action"]?.ToString() == "SanPham" ? "active" : "")"
                            href="#" id="spDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+
                             Sản phẩm
+
                         </a>
+
                         <ul class="dropdown-menu dropdown-menu-custom" aria-labelledby="spDropdown">
+
                             <li><a class="dropdown-item dropdown-item-custom" asp-controller="Home" asp-action="SanPham">Tất cả sản phẩm</a></li>
+
                             <li><hr class="dropdown-divider"></li>
+
                             <li><a class="dropdown-item dropdown-item-custom" asp-controller="Home" asp-action="SanPham" asp-route-filter="banchay">🔥 Bán chạy nhất</a></li>
+
                             <li><a class="dropdown-item dropdown-item-custom" asp-controller="Home" asp-action="SanPham" asp-route-filter="moinhat">✨ Món mới nhất</a></li>
+
                             <li><a class="dropdown-item dropdown-item-custom" asp-controller="Home" asp-action="SanPham" asp-route-filter="hot">🌟 Đang HOT</a></li>
+
                             <li><a class="dropdown-item dropdown-item-custom" asp-controller="Home" asp-action="SanPham" asp-route-filter="giamgia">💸 Đang giảm giá</a></li>
+
                         </ul>
+
                     </li>
 
-                    <li><a class="nav-link-custom @(ViewContext.RouteData.Values["Action"]?.ToString() == "LienHe" ? "active" : "")" asp-controller="Home" asp-action="LienHe">Liên hệ</a></li>
-                    <li><a class="nav-link-custom @(ViewContext.RouteData.Values["Action"]?.ToString() == "Cart" ? "active" : "")" asp-controller="Home" asp-action="Cart">Giỏ hàng</a></li>
 
-                    @* --- PHẦN THÊM CHO ADMIN --- *@
-                    @if (User.IsInRole("Admin"))
+
+                    <li><a class="nav-link-custom @(ViewContext.RouteData.Values["Action"]?.ToString() == "LienHe" ? "active" : "")" asp-controller="Home" asp-action="LienHe">Liên hệ</a></li>
+
+
+
+                    @* --- PHẦN MENU DÀNH RIÊNG CHO ADMIN --- *@
+
+                    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+
                     {
+
                         <li class="nav-item dropdown">
-                            <a class="nav-link-custom dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: rgba(0,0,0,0.1);">
-                                <i class="fas fa-user-shield me-1"></i> Quản lý
+
+                            <a class="nav-link-custom dropdown-toggle fw-bold text-warning" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: rgba(0,0,0,0.15);">
+
+                                <i class="fas fa-user-shield me-1"></i> QUẢN TRỊ VIÊN
+
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-custom" aria-labelledby="adminDropdown">
-                                <li><a class="dropdown-item dropdown-item-custom" asp-controller="AdminProduct" asp-action="Index">Danh sách sản phẩm</a></li>
-                                <li><a class="dropdown-item dropdown-item-custom" asp-controller="AdminProduct" asp-action="Create">Thêm sản phẩm mới</a></li>
+
+                            <ul class="dropdown-menu dropdown-menu-custom shadow-lg" aria-labelledby="adminDropdown">
+
+                                <li><h6 class="dropdown-header">Hệ thống</h6></li>
+
+                                <li><a class="dropdown-item dropdown-item-custom" asp-controller="AdminProduct" asp-action="Index"><i class="fas fa-box me-2"></i>Danh sách sản phẩm</a></li>
+
+                                <li><a class="dropdown-item dropdown-item-custom" asp-controller="AdminProduct" asp-action="Create"><i class="fas fa-plus-circle me-2"></i>Thêm sản phẩm mới</a></li>
+
+                                <li><hr class="dropdown-divider"></li>
+
+                                <li><h6 class="dropdown-header">Kinh doanh</h6></li>
+
+                                <li><a class="dropdown-item dropdown-item-custom" asp-controller="AdminProduct" asp-action="KhachHang"><i class="fas fa-users me-2"></i>Quản lý Khách hàng</a></li>
+
+                                <li><a class="dropdown-item dropdown-item-custom" asp-controller="AdminProduct" asp-action="DoanhThu"><i class="fas fa-chart-line me-2"></i>Thống kê Doanh thu</a></li>
+
                             </ul>
+
                         </li>
+
                     }
+
                 </ul>
+
             </div>
+
         </div>
+
     </header>
 
+
+
     <main role="main">
+
         <div class="container-fluid p-0">
+
             @RenderBody()
+
         </div>
+
     </main>
 
+
+
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+
         <div id="cartToast" class="toast align-items-center text-dark bg-white border-0 shadow-sm rounded-3" role="alert">
+
             <div class="d-flex p-2">
+
                 <div class="toast-body fw-bold fs-6" id="toastMessage"></div>
+
                 <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+
             </div>
+
         </div>
+
     </div>
+
+
 
     <div class="offcanvas offcanvas-end shadow offcanvas-cart" tabindex="-1" id="cartOffcanvas">
+
         <div class="offcanvas-header border-bottom bg-light">
+
             <h5 class="offcanvas-title fw-bold text-danger">
+
                 <i class="fas fa-shopping-bag me-2"></i><span id="mini-cart-count">0</span> món ăn
+
             </h5>
+
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+
         </div>
+
         <div class="offcanvas-body p-0" id="mini-cart-items" style="overflow-y: auto;"></div>
+
         <div class="offcanvas-footer p-3 border-top bg-light">
+
             <div class="d-flex justify-content-between text-muted mb-1" style="font-size: 0.9rem;">
+
                 <span>Tổng số sản phẩm:</span>
+
                 <span id="mini-cart-total-qty" class="fw-bold text-dark">0 sản phẩm</span>
+
             </div>
+
             <div class="d-flex justify-content-between fw-bold mb-3 fs-5">
+
                 <span>Tổng tiền:</span>
+
                 <span id="mini-cart-total" class="text-danger">0đ</span>
+
             </div>
+
             <a asp-controller="Home" asp-action="Cart" class="btn btn-danger w-100 rounded-pill fw-bold py-2 shadow-sm">XEM GIỎ HÀNG CHI TIẾT</a>
+
         </div>
+
     </div>
 
+
+
     <footer class="border-top">
+
         <div class="container text-center">
+
             <div class="row text-start">
+
                 <div class="col-md-4">
+
                     <h5 class="fw-bold text-warning">ĂN VẶT FOODIE</h5>
+
                     <p class="small text-secondary">Chuyên cung cấp các loại đồ ăn vặt chất lượng, đảm bảo vệ sinh an toàn thực phẩm.</p>
+
                 </div>
+
                 <div class="col-md-4">
+
                     <h5 class="fw-bold text-white">Liên kết nhanh</h5>
+
                     <ul class="list-unstyled">
+
                         <li><a href="#" class="small">Chính sách giao hàng</a></li>
+
                         <li><a href="#" class="small">Điều khoản sử dụng</a></li>
+
                     </ul>
+
                 </div>
+
                 <div class="col-md-4 text-end">
+
                     <h5 class="fw-bold text-white">Theo dõi chúng tôi</h5>
+
                     <a href="#" class="me-3"><i class="fab fa-facebook fa-lg text-white"></i></a>
+
                     <a href="#"><i class="fab fa-tiktok fa-lg text-white"></i></a>
+
                 </div>
+
             </div>
+
             <hr>
+
             <p class="small mb-0">&copy; 2026 - WebsiteBanDoAnVat - Bảo Ngọc & Hồ Bảo</p>
+
         </div>
+
     </footer>
 
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
+
         let lastScrollTop = 0;
+
         const header = document.getElementById('mainHeader');
+
         window.addEventListener('scroll', function() {
+
             let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
             header.style.transform = (scrollTop > lastScrollTop && scrollTop > 150) ? "translateY(-100%)" : "translateY(0)";
+
             lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+
         });
+
+
 
         document.addEventListener("DOMContentLoaded", function () {
+
             let cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
+
             const updateUI = () => {
+
                 const badge = document.getElementById('cart-badge');
+
                 const miniCount = document.getElementById('mini-cart-count');
+
                 const miniTotal = document.getElementById('mini-cart-total');
 
+
+
                 if(badge) badge.innerText = cart.length;
+
                 if(miniCount) miniCount.innerText = cart.length;
 
+
+
                 const totalMoney = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+
                 if(miniTotal) miniTotal.innerText = totalMoney.toLocaleString('vi-VN') + 'đ';
+
             };
+
             updateUI();
+
         });
+
     </script>
 
+
+
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
+
 </html>

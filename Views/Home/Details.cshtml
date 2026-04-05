@@ -1,0 +1,24 @@
+﻿@model WebsiteBanDoAnVat.Models.MonAn
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container mt-5">
+    <div class="row bg-white p-4 shadow-sm rounded-4">
+        <div class="col-md-5">
+            <img src="@Model.ImageUrl" class="img-fluid rounded-3" alt="@Model.Name">
+        </div>
+        <div class="col-md-7 ps-md-5">
+            <h1 class="fw-bold">@Model.Name</h1>
+            <h3 class="text-danger">@Model.Price.ToString("N0") VNĐ</h3>
+            <hr>
+            <p class="text-muted">@Model.Description</p>
+
+            <div class="mt-4">
+                <button class="btn btn-danger btn-lg px-5 rounded-pill shadow" onclick="themVaoGio(@Model.Id)">
+                    <i class="fas fa-cart-plus me-2"></i>MUA NGAY
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
