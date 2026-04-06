@@ -1,4 +1,5 @@
-﻿@{
+﻿@model List<WebsiteBanDoAnVat.Models.CartItem>
+@{
     ViewData["Title"] = "Giỏ Hàng Của Bạn";
 }
 
@@ -82,7 +83,7 @@
                     <a href="#" class="text-decoration-none small fw-bold" style="color: #ff4757;" data-bs-toggle="modal" data-bs-target="#addressModal">Thêm địa chỉ</a>
                 </div>
                 <div class="bg-light p-3 rounded-3 text-center border">
-                    <span class="fw-bold text-muted" style="font-size: 0.9rem;">Vui lòng thêm địa chỉ</span>
+                    <span class="fw-bold text-muted" style="font-size: 0.9rem;">Thông tin khách vãng lai</span>
                 </div>
             </div>
 
@@ -116,52 +117,27 @@
                 </div>
                 <div class="text-end text-muted mb-4" style="font-size: 0.75rem;">(Đã bao gồm VAT nếu có)</div>
 
-                <button class="btn btn-danger w-100 rounded-pill fw-bold py-2 shadow-sm fs-6" id="checkout-btn-text">Mua hàng (0)</button>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header border-0 pb-0 mt-2">
-                <h5 class="modal-title w-100 text-center fw-bold" id="addressModalLabel" style="color: #ff4757;">Thêm địa chỉ</h5>
-                <button type="button" class="btn-close position-absolute end-0 me-3" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <form id="addressForm">
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <input type="text" class="form-control rounded-3" placeholder="Tên người nhận" required>
-                        </div>
-                        <div class="col-md-6">
-                            <input type="tel" class="form-control rounded-3" placeholder="Số điện thoại" required>
-                        </div>
-                    </div>
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <input type="text" class="form-control rounded-3" placeholder="Tỉnh / Thành phố" required>
-                        </div>
-                        <div class="col-md-6">
-                            <input type="text" class="form-control rounded-3" placeholder="Phường / Xã" required>
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <input type="text" class="form-control rounded-3" placeholder="Địa chỉ cụ thể" required>
-                    </div>
+                <form asp-action="Checkout" method="post" id="checkoutForm">
+                    <input type="hidden" name="customerName" value="Khách vãng lai" />
+                    <input type="hidden" name="phone" value="0900000000" />
+                    <input type="hidden" name="address" value="Tại cửa hàng / Mua nhanh" />
+                    <input type="hidden" id="cartJsonInput" name="cartJson" />
 
-                    <button type="button" class="btn btn-danger w-100 rounded-pill fw-bold py-2 shadow-sm fs-6" data-bs-dismiss="modal">Xác nhận</button>
+                    <button type="submit" class="btn btn-danger w-100 rounded-pill fw-bold py-2 shadow-sm fs-6" id="checkout-btn-text">
+                        Mua hàng (0)
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             renderCartPage();
 
-            // Hàm vẽ giao diện trang Giỏ hàng
+            // 1. Hàm vẽ giao diện trang Giỏ hàng
             function renderCartPage() {
                 const cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
                 const container = document.getElementById('cart-page-items');
@@ -169,22 +145,18 @@
                 const cartContent = document.getElementById('cart-content');
                 const totalItemsLabel = document.getElementById('total-items-label');
 
-                // Nếu giỏ hàng trống -> Ẩn chia cột, Hiện thông báo trống
                 if (cart.length === 0) {
                     cartContent.classList.add('d-none');
                     emptyMsg.classList.remove('d-none');
                     return;
                 }
 
-                // Có hàng -> Hiện chia cột
                 cartContent.classList.remove('d-none');
                 emptyMsg.classList.add('d-none');
 
-                // Cập nhật dòng "Tất cả x sản phẩm"
                 const totalQty = cart.reduce((sum, i) => sum + i.quantity, 0);
                 totalItemsLabel.innerText = `Tất cả ${cart.length} sản phẩm`;
 
-                // Render danh sách món
                 let totalMoney = 0;
                 container.innerHTML = cart.map((item, index) => {
                     const lineTotal = item.price * item.quantity;
@@ -195,17 +167,11 @@
                             <img src="${item.image}" class="rounded-3 border me-3" style="width: 80px; height: 80px; object-fit: cover;">
                             <div>
                                 <h6 class="fw-bold mb-2 text-dark" style="font-size: 0.95rem;">${item.name}</h6>
-                                <select class="form-select form-select-sm text-muted bg-light border-0 shadow-none" style="width: 100px; font-size: 0.8rem;">
-                                    <option>500gr</option>
-                                    <option>1kg</option>
-                                </select>
                             </div>
                         </div>
-
                         <div class="col-4 col-md-2 fw-bold text-dark text-md-center" style="font-size: 0.95rem;">
                             <span class="d-md-none text-muted fw-normal me-2">Giá:</span>${item.price.toLocaleString('vi-VN')} đ
                         </div>
-
                         <div class="col-4 col-md-2 d-flex justify-content-md-center">
                             <div class="d-flex align-items-center border rounded-pill px-1 py-1 bg-white shadow-sm">
                                 <button class="qty-btn decrease-btn" data-id="${item.id}">-</button>
@@ -213,7 +179,6 @@
                                 <button class="qty-btn increase-btn" data-id="${item.id}">+</button>
                             </div>
                         </div>
-
                         <div class="col-4 col-md-3 d-flex justify-content-between justify-content-md-end align-items-center">
                             <span class="fw-bold" style="color: #ff4757; font-size: 1.05rem;">
                                 ${lineTotal.toLocaleString('vi-VN')} đ
@@ -225,16 +190,40 @@
                     </div>`;
                 }).join('');
 
-                // Cập nhật phần Tính tiền bên phải
                 document.getElementById('cart-subtotal').innerText = totalMoney.toLocaleString('vi-VN') + ' đ';
                 document.getElementById('cart-total').innerText = totalMoney.toLocaleString('vi-VN') + ' đ';
                 document.getElementById('checkout-btn-text').innerText = `Mua hàng (${totalQty})`;
             }
 
-            // Lắng nghe sự kiện click trên toàn body (Dùng chung bộ nút với Layout)
-            // Đặt setTimeout để đợi logic trong _Layout.cshtml cập nhật LocalStorage xong rồi mới vẽ lại trang này
+            // 2. Xử lý khi bấm nút "Mua hàng"
+            document.getElementById('checkoutForm').addEventListener('submit', function (e) {
+                const cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
+                if (cart.length === 0) {
+                    alert("Giỏ hàng của bạn đang trống!");
+                    e.preventDefault();
+                    return;
+                }
+
+                // Chuẩn hóa dữ liệu để khớp với lớp CartItem trong C#
+                // Đổi 'id' thành 'ProductId' và 'name' thành 'ProductName'
+                const formattedCart = cart.map(item => ({
+                    ProductId: item.id,
+                    ProductName: item.name,
+                    Price: item.price,
+                    Quantity: item.quantity,
+                    ImageUrl: item.image
+                }));
+
+                // Gán chuỗi JSON vào input ẩn
+                document.getElementById('cartJsonInput').value = JSON.stringify(formattedCart);
+
+                // Xóa giỏ hàng local sau khi submit thành công
+                localStorage.removeItem('anvat_cart');
+            });
+
+            // 3. Lắng nghe thay đổi số lượng
             document.body.addEventListener('click', function(e) {
-                if (e.target.closest('.increase-btn') || e.target.closest('.decrease-btn') || e.target.closest('.remove-item-btn') || e.target.closest('.add-to-cart-btn')) {
+                if (e.target.closest('.increase-btn') || e.target.closest('.decrease-btn') || e.target.closest('.remove-item-btn')) {
                     setTimeout(renderCartPage, 50);
                 }
             });

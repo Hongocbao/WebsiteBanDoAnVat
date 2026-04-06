@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebsiteBanDoAnVat.Data;
 using WebsiteBanDoAnVat.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace WebsiteBanDoAnVat.Controllers
 {
@@ -11,44 +12,30 @@ namespace WebsiteBanDoAnVat.Controllers
     public class AdminProductController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _hostEnvironment;
+        // BỔ SUNG: Khai báo UserManager để quản lý khách hàng
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public AdminProductController(AppDbContext context)
+        // Cập nhật Constructor để nhận UserManager
+        public AdminProductController(
+            AppDbContext context,
+            IWebHostEnvironment hostEnvironment,
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _hostEnvironment = hostEnvironment;
+            _userManager = userManager;
         }
 
-        // 1. Danh sách sản phẩm
+        // ==========================================
+        // 1. DANH SÁCH & THÊM MỚI
+        // ==========================================
         public async Task<IActionResult> Index()
         {
             var products = await _context.MonAns.Include(m => m.Category).ToListAsync();
             return View(products);
         }
 
-        // 2. QUẢN LÝ ĐƠN HÀNG (MỚI THÊM)
-        public async Task<IActionResult> OrderManagement()
-        {
-            // Lấy danh sách đơn hàng khớp với Model Order của Bảo (CustomerName, PhoneNumber...)
-            var orders = await _context.Orders
-                .OrderByDescending(o => o.OrderDate)
-                .ToListAsync();
-            return View(orders);
-        }
-
-        // 3. CHI TIẾT HÓA ĐƠN (MỚI THÊM)
-        public async Task<IActionResult> ChiTietHoaDon(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var order = await _context.Orders
-                .Include(o => o.OrderDetails!)
-                .ThenInclude(d => d.MonAn)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (order == null) return NotFound();
-            return View(order);
-        }
-
-        // Các hàm CRUD Sản phẩm (Create, Edit, Delete...) giữ nguyên như code cũ của bạn
         public IActionResult Create()
         {
             ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name");
@@ -61,22 +48,162 @@ namespace WebsiteBanDoAnVat.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (imageFile != null) monAn.ImageUrl = await SaveImage(imageFile);
+                if (imageFile != null)
+                {
+                    monAn.ImageUrl = await SaveImage(imageFile);
+                }
                 _context.Add(monAn);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", monAn.CategoryId);
             return View(monAn);
         }
 
+        // ==========================================
+        // 2. CẬP NHẬT (EDIT)
+        // ==========================================
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var monAn = await _context.MonAns.FindAsync(id);
+            if (monAn == null) return NotFound();
+
+            ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", monAn.CategoryId);
+            return View(monAn);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, MonAn monAn, IFormFile? imageFile)
+        {
+            if (id != monAn.Id) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    if (imageFile != null)
+                    {
+                        if (!string.IsNullOrEmpty(monAn.ImageUrl))
+                        {
+                            DeleteOldImage(monAn.ImageUrl);
+                        }
+                        monAn.ImageUrl = await SaveImage(imageFile);
+                    }
+                    _context.Update(monAn);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!MonAnExists(monAn.Id)) return NotFound();
+                    else throw;
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", monAn.CategoryId);
+            return View(monAn);
+        }
+
+        // ==========================================
+        // 3. XÓA (DELETE MÓN ĂN)
+        // ==========================================
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var monAn = await _context.MonAns.FindAsync(id);
+            if (monAn != null)
+            {
+                if (!string.IsNullOrEmpty(monAn.ImageUrl))
+                {
+                    DeleteOldImage(monAn.ImageUrl);
+                }
+                _context.MonAns.Remove(monAn);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        // ==========================================
+        // QUẢN LÝ ĐƠN HÀNG
+        // ==========================================
+        public async Task<IActionResult> OrderManagement()
+        {
+            var orders = await _context.Orders.OrderByDescending(o => o.OrderDate).ToListAsync();
+            return View(orders);
+        }
+
+        public IActionResult DoanhThu()
+        {
+            decimal tongDoanhThu = _context.Orders.Sum(o => o.TotalAmount);
+            int tongDonHang = _context.Orders.Count();
+
+            ViewBag.TotalRevenue = tongDoanhThu;
+            ViewBag.TotalOrders = tongDonHang;
+
+            var recentOrders = _context.Orders.OrderByDescending(o => o.OrderDate).Take(10).ToList();
+            return View(recentOrders);
+        }
+
+        // ==========================================
+        // TRANG KHÁCH HÀNG (Sửa lỗi _userManager)
+        // ==========================================
+        public async Task<IActionResult> KhachHang(string searchTerm)
+        {
+            var query = _userManager.Users.Where(u => u.IsActive).AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(u => (u.HoTen != null && u.HoTen.Contains(searchTerm))
+                                      || (u.PhoneNumber != null && u.PhoneNumber.Contains(searchTerm))
+                                      || (u.MaSinhVien != null && u.MaSinhVien.Contains(searchTerm)));
+                ViewBag.SearchTerm = searchTerm;
+            }
+
+            var list = await query.OrderByDescending(u => u.NgayDangKy).ToListAsync();
+            return View(list);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteKhachHang(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user != null)
+            {
+                user.IsActive = false;
+                await _userManager.UpdateAsync(user);
+            }
+            return RedirectToAction(nameof(KhachHang));
+        }
+
+        public async Task<IActionResult> ChiTietHoaDon(int? id)
+        {
+            if (id == null) return NotFound();
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails!)
+                .ThenInclude(d => d.MonAn)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            return order == null ? NotFound() : View(order);
+        }
+
+        // Helper Methods
         private async Task<string> SaveImage(IFormFile imageFile)
         {
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", fileName);
+            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            string uploadPath = Path.Combine(_hostEnvironment.WebRootPath, "images");
+            if (!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
+            string filePath = Path.Combine(uploadPath, fileName);
             using (var stream = new FileStream(filePath, FileMode.Create)) { await imageFile.CopyToAsync(stream); }
             return "/images/" + fileName;
         }
 
-        // (Thêm các hàm Edit, Delete của bạn vào đây...)
+        private void DeleteOldImage(string imageUrl)
+        {
+            string oldPath = Path.Combine(_hostEnvironment.WebRootPath, imageUrl.TrimStart('/'));
+            if (System.IO.File.Exists(oldPath)) System.IO.File.Delete(oldPath);
+        }
+
+        private bool MonAnExists(int id) => _context.MonAns.Any(e => e.Id == id);
     }
 }

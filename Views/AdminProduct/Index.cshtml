@@ -16,20 +16,38 @@
                     <th>Tên món</th>
                     <th>Loại</th>
                     <th>Giá</th>
-                    <th>Thao tác</th>
+                    <th class="text-center">Thao tác</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td><img src="@item.ImageUrl" width="60" class="rounded shadow-sm" onerror="this.src='/images/no-image.png'"></td>
-                        <td class="fw-bold">@item.Name</td>
-                        <td><span class="badge bg-info text-dark">@item.Category?.Name</span></td>
-                        <td class="text-danger">@item.Price.ToString("N0")đ</td>
                         <td>
-                            <a class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
-                            <a class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+                            <img src="@item.ImageUrl" width="60" height="60" class="rounded shadow-sm"
+                                 style="object-fit: cover;" onerror="this.src='/images/no-image.png'">
+                        </td>
+                        <td class="fw-bold">@item.Name</td>
+                        <td>
+                            <span class="badge bg-info text-dark">
+                                @(item.Category?.Name ?? "Chưa phân loại")
+                            </span>
+                        </td>
+                        <td class="text-danger fw-bold">@item.Price.ToString("N0")đ</td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a asp-action="Edit" asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-outline-primary" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                <form asp-action="Delete" asp-route-id="@item.Id" method="post"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa món [@item.Name] không?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 }

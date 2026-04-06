@@ -5,20 +5,82 @@
 
 <div class="container mt-5">
     <div class="row bg-white p-4 shadow-sm rounded-4">
-        <div class="col-md-5">
-            <img src="@Model.ImageUrl" class="img-fluid rounded-3" alt="@Model.Name">
+        <div class="col-md-5 text-center">
+            <img src="@Model.ImageUrl" class="img-fluid rounded-4 shadow-sm" alt="@Model.Name" style="max-height: 400px; width: 100%; object-fit: cover;">
         </div>
-        <div class="col-md-7 ps-md-5">
-            <h1 class="fw-bold">@Model.Name</h1>
-            <h3 class="text-danger">@Model.Price.ToString("N0") VNĐ</h3>
+        <div class="col-md-7 ps-md-5 pt-4 pt-md-0">
+            <h1 class="fw-bold text-dark">@Model.Name</h1>
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="text-warning"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></span>
+                <span class="text-muted small">(4.5/5 - 24 đánh giá)</span>
+            </div>
+            <h3 class="text-danger fw-bold">@Model.Price.ToString("N0") VNĐ</h3>
             <hr>
-            <p class="text-muted">@Model.Description</p>
+            <p class="text-muted" style="line-height: 1.8;">@Model.Description</p>
 
-            <div class="mt-4">
-                <button class="btn btn-danger btn-lg px-5 rounded-pill shadow" onclick="themVaoGio(@Model.Id)">
-                    <i class="fas fa-cart-plus me-2"></i>MUA NGAY
+            <div class="mt-4 d-flex gap-3">
+                <button class="btn btn-danger btn-lg px-5 rounded-pill shadow-sm" onclick="muaNgay(@Model.Id)">
+                    <i class="fas fa-bolt me-2"></i>MUA NGAY
                 </button>
+
+                <form asp-action="AddToCart" method="post">
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-outline-danger btn-lg px-4 rounded-pill">
+                        <i class="fas fa-cart-plus"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5 bg-white p-4 shadow-sm rounded-4 mb-5">
+        <div class="col-12">
+            <h4 class="fw-bold mb-4 border-bottom pb-2">Đánh giá từ khách hàng</h4>
+
+            <div class="mb-5 p-3 border rounded-3 bg-light">
+                <h6 class="fw-bold">Viết đánh giá của bạn</h6>
+                <form asp-action="PostComment" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="MonAnId" value="@Model.Id" />
+                    <div class="mb-3">
+                        <label class="form-label small">Chất lượng sản phẩm</label>
+                        <select name="Rating" class="form-select form-select-sm w-auto text-warning">
+                            <option value="5">⭐⭐⭐⭐⭐ (Tuyệt vời)</option>
+                            <option value="4">⭐⭐⭐⭐ (Tốt)</option>
+                            <option value="3">⭐⭐⭐ (Bình thường)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <textarea name="Content" class="form-control" rows="3" placeholder="Món ăn này có ngon không Bảo? Hãy chia sẻ cảm nhận nhé..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small">Gửi kèm hình ảnh đánh giá (nếu có)</label>
+                        <input type="file" name="imageFile" class="form-control form-control-sm">
+                    </div>
+                    <button type="submit" class="btn btn-dark btn-sm rounded-pill px-4">Gửi đánh giá</button>
+                </form>
+            </div>
+
+            <div class="review-list">
+                <div class="d-flex gap-3 mb-4 border-bottom pb-3">
+                    <img src="https://ui-avatars.com/api/?name=Ngoc+Bao&background=random" class="rounded-circle" width="50" height="50">
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <h6 class="mb-0 fw-bold">Ngọc Bảo</h6>
+                            <span class="text-warning small"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></span>
+                        </div>
+                        <p class="mb-1 text-muted small">10:30 - 06/04/2026</p>
+                        <p class="mb-0">Món này cực kỳ ngon, giòn và vừa miệng. Sẽ ủng hộ shop dài dài!</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function muaNgay(id) {
+        // Chức năng này sẽ gọi AddToCart sau đó chuyển thẳng tới trang Thanh Toán
+        console.log("Đang tiến hành mua ngay sản phẩm ID:", id);
+        // Implement logic redirect ở đây
+    }
+</script>   
