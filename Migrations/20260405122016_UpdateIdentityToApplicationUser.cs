@@ -5,7 +5,7 @@
 namespace WebsiteBanDoAnVat.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateToApplicationUser : Migration
+    public partial class UpdateIdentityToApplicationUser : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

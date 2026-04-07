@@ -12,8 +12,8 @@ using WebsiteBanDoAnVat.Data;
 namespace WebsiteBanDoAnVat.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260402103611_InitialCreateV2")]
-    partial class InitialCreateV2
+    [Migration("20260407043452_UpdateCustomerFields")]
+    partial class UpdateCustomerFields
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -75,71 +75,6 @@ namespace WebsiteBanDoAnVat.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetRoleClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -227,6 +162,86 @@ namespace WebsiteBanDoAnVat.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("WebsiteBanDoAnVat.Models.ApplicationUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("HoTen")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSinhVien")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("MaSinhVien")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("NgayDangKy")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
             modelBuilder.Entity("WebsiteBanDoAnVat.Models.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -245,6 +260,26 @@ namespace WebsiteBanDoAnVat.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Khô gà, khô bò các loại",
+                            Name = "Đồ Khô"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Bánh tráng trộn, nướng",
+                            Name = "Bánh Tráng"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Kẹo, bánh ngọt, trái cây sấy",
+                            Name = "Ăn Vặt Ngọt"
+                        });
                 });
 
             modelBuilder.Entity("WebsiteBanDoAnVat.Models.MonAn", b =>
@@ -267,6 +302,9 @@ namespace WebsiteBanDoAnVat.Migrations
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsBestSeller")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -274,11 +312,103 @@ namespace WebsiteBanDoAnVat.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
                     b.ToTable("MonAns");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CategoryId = 1,
+                            ImageUrl = "https://images.unsplash.com/photo-1621236322951-f073527a4411?w=400",
+                            IsAvailable = true,
+                            IsBestSeller = true,
+                            Name = "Khô Bò Giòn Cay Hồng Ngự",
+                            Price = 380000m,
+                            StockQuantity = 50,
+                            ViewCount = 0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CategoryId = 2,
+                            ImageUrl = "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400",
+                            IsAvailable = true,
+                            IsBestSeller = true,
+                            Name = "Bánh Tráng Muối Bò Premium",
+                            Price = 110000m,
+                            StockQuantity = 100,
+                            ViewCount = 0
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CategoryId = 2,
+                            ImageUrl = "https://images.unsplash.com/photo-1621236322951-f073527a4411?w=400",
+                            IsAvailable = true,
+                            IsBestSeller = true,
+                            Name = "Bánh Tráng Tóp Mỡ",
+                            Price = 130000m,
+                            StockQuantity = 80,
+                            ViewCount = 0
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CategoryId = 1,
+                            ImageUrl = "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400",
+                            IsAvailable = true,
+                            IsBestSeller = true,
+                            Name = "Khô Bò Vụn",
+                            Price = 320000m,
+                            StockQuantity = 30,
+                            ViewCount = 0
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CategoryId = 3,
+                            ImageUrl = "https://images.unsplash.com/photo-1621236322951-f073527a4411?w=400",
+                            IsAvailable = true,
+                            IsBestSeller = false,
+                            Name = "Chùm Ruột Muối Tắc",
+                            Price = 120000m,
+                            StockQuantity = 200,
+                            ViewCount = 0
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CategoryId = 3,
+                            ImageUrl = "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400",
+                            IsAvailable = true,
+                            IsBestSeller = false,
+                            Name = "Kẹo Dừa Sáp Bọc Xíu",
+                            Price = 110000m,
+                            StockQuantity = 150,
+                            ViewCount = 0
+                        },
+                        new
+                        {
+                            Id = 7,
+                            CategoryId = 1,
+                            ImageUrl = "https://images.unsplash.com/photo-1621236322951-f073527a4411?w=400",
+                            IsAvailable = true,
+                            IsBestSeller = false,
+                            Name = "Mực Rim Me Sấy Mè",
+                            Price = 150000m,
+                            StockQuantity = 40,
+                            ViewCount = 0
+                        });
                 });
 
             modelBuilder.Entity("WebsiteBanDoAnVat.Models.Order", b =>
@@ -295,21 +425,18 @@ namespace WebsiteBanDoAnVat.Migrations
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
@@ -359,7 +486,7 @@ namespace WebsiteBanDoAnVat.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("WebsiteBanDoAnVat.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -368,7 +495,7 @@ namespace WebsiteBanDoAnVat.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("WebsiteBanDoAnVat.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -383,7 +510,7 @@ namespace WebsiteBanDoAnVat.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("WebsiteBanDoAnVat.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -392,7 +519,7 @@ namespace WebsiteBanDoAnVat.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("WebsiteBanDoAnVat.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

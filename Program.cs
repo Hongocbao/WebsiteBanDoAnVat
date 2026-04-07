@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebsiteBanDoAnVat.Data;
 using Microsoft.AspNetCore.Identity;
-using WebsiteBanDoAnVat.Models; // <<--- Đảm bảo có dòng này
+using WebsiteBanDoAnVat.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. Cấu hình Identity (Dùng ApplicationUser để lưu được MSSV)
+// 2. Cấu hình Identity 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => {
     options.SignIn.RequireConfirmedAccount = false;
     options.Password.RequireDigit = false;
@@ -17,11 +17,12 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => {
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
 })
-.AddRoles<IdentityRole>() // <<--- BẮT BUỘC PHẢI CÓ ĐỂ PHÂN QUYỀN
+.AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddSession();
 
 var app = builder.Build();
 
@@ -44,5 +45,5 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
-
+app.UseSession();
 app.Run();

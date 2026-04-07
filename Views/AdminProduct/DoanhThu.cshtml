@@ -1,0 +1,90 @@
+﻿@{
+    ViewData["Title"] = "Thống kê doanh thu";
+}
+
+<div class="container-fluid mt-4">
+    <h4 class="fw-bold mb-4 text-uppercase">Báo Cáo Doanh Thu</h4>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold small">Từ ngày</label>
+                    <input type="date" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold small">Đến ngày</label>
+                    <input type="date" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold small">Loại báo cáo</label>
+                    <select class="form-select">
+                        <option>Thống kê theo ngày</option>
+                        <option>Thống kê theo tháng</option>
+                        <option>Thống kê theo món ăn</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-success w-100 fw-bold">Lấy dữ liệu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4 text-white">
+        <div class="col-md-4">
+            <div class="card bg-primary border-0 shadow-sm">
+                <div class="card-body py-4">
+                    <h6 class="text-uppercase opacity-75 small">Tổng doanh thu</h6>
+                    <h2 class="fw-bold mb-0">15.250.000đ</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-warning text-dark border-0 shadow-sm">
+                <div class="card-body py-4">
+                    <h6 class="text-uppercase opacity-75 small">Tổng số hóa đơn</h6>
+                    <h2 class="fw-bold mb-0">124</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info border-0 shadow-sm">
+                <div class="card-body py-4">
+                    <h6 class="text-uppercase opacity-75 small">Lợi nhuận ước tính</h6>
+                    <h2 class="fw-bold mb-0">4.500.000đ</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h6 class="mb-0 fw-bold text-secondary">LỊCH SỬ GIAO DỊCH GẦN ĐÂY</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Mã HD</th>
+                            <th>Thời gian</th>
+                            <th>Khách hàng</th>
+                            <th class="text-end">Tổng tiền</th>
+                            <th class="text-center">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#HD10025</td>
+                            <td>05/04/2026 19:30</td>
+                            <td>Bảo Ngọc</td>
+                            <td class="fw-bold text-end">185.000đ</td>
+                            <td class="text-center"><span class="badge bg-success">Hoàn thành</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
