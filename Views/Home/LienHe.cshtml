@@ -1,13 +1,76 @@
-﻿<!DOCTYPE html>
+﻿@{
+    ViewData["Title"] = "Liên Hệ Với Chúng Tôi";
+}
 
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>@ViewBag.Title</title>
-</head>
-<body>
-    <div>
-        
+<div class="container my-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none text-danger fw-bold">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Liên hệ</li>
+        </ol>
+    </nav>
+
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-uppercase" style="color: #ff4757;">Liên Hệ Ăn Vặt Foodie</h2>
+        <p class="text-muted">Chúng tôi luôn sẵn sàng lắng nghe và giải đáp mọi thắc mắc của bạn!</p>
     </div>
-</body>
-</html>
+
+    <div class="row justify-content-center g-4">
+
+        <div class="col-lg-6 col-md-8">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
+                <div class="card-body p-4 p-md-5">
+                    <h4 class="fw-bold mb-4 border-bottom pb-3 text-center">Thông Tin Cửa Hàng</h4>
+
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; flex-shrink: 0;">
+                            <i class="fas fa-map-marker-alt fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Địa chỉ:</h6>
+                            <p class="text-muted mb-0">Trường Đại học HUTECH, Khu Công Nghệ Cao, TP. Thủ Đức, TP.HCM</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; flex-shrink: 0;">
+                            <i class="fas fa-phone-alt fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Điện thoại:</h6>
+                            <p class="text-muted mb-0">0988 777 666</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; flex-shrink: 0;">
+                            <i class="fas fa-envelope fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Email:</h6>
+                            <p class="text-muted mb-0">hotro@anvatfoodie.com</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start justify-content-center mt-5 pt-3 border-top">
+                        <div class="d-flex gap-3">
+                            <a href="https://www.facebook.com/hi.hi.511933" class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;"><i class="fab fa-facebook-f fs-5"></i></a>
+                            <a href="https://www.tiktok.com/@@anvat1310" class="btn btn-outline-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;"><i class="fab fa-tiktok fs-5"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5 card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden; padding: 0;">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.4206639912165!2d106.78252207570377!3d10.85557478930005!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3175276e7ea103df%3A0xb6cf10bb7d719327!2zSFVURUNIIC0gVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBDw7RuZyBuZ2jhu4cgVFAuSENNICjDnm0gVHJ1bmcgVMOibSDEkMOgbyBU4bqhbyBOaMOibiBM4buxYyBDaGF0IEzGsOG7o25nIENhbyk!5e0!3m2!1svi!2s!4v1712490000000!5m2!1svi!2s"
+                width="100%"
+                height="450"
+                style="border:0;"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+    </div>
+</div>
