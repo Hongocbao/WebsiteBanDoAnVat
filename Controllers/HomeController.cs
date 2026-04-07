@@ -19,22 +19,41 @@ namespace WebsiteBanDoAnVat.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? categoryId, int page = 1)
         {
+            int pageSize = 9; // Lấy 9 món 1 trang cho mục Gợi Ý
             var viewModel = new HomeViewModel();
 
-            // 1. Lấy danh sách danh mục
+            // 1. Lấy danh sách danh mục để vẽ Menu
             viewModel.Categories = await _context.Categories.ToListAsync();
 
-            // 2. Lấy sản phẩm bán chạy (Ví dụ: lấy 4 món có giá cao nhất hoặc mới nhất)
-            // Nếu Bảo có cột IsHot hoặc IsBestSeller trong DB thì dùng .Where(m => m.IsHot)
+            // 2. Lấy 4 sản phẩm bán chạy (Mục ở trên)
             viewModel.BestSellers = await _context.MonAns
-                .OrderByDescending(m => m.Id) // Lấy món mới nhất
+                .Where(m => m.IsAvailable)
+                .OrderByDescending(m => m.Id)
                 .Take(4)
                 .ToListAsync();
 
-            // 3. Lấy toàn bộ sản phẩm cho mục phía dưới
-            viewModel.AllProducts = await _context.MonAns.ToListAsync();
+            // 3. Xử lý phần "GỢI Ý CHO BẠN" (Cắt trang + Lọc theo Danh mục)
+            var query = _context.MonAns.Where(m => m.IsAvailable).AsQueryable();
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(m => m.CategoryId == categoryId.Value);
+                ViewBag.CurrentCategoryId = categoryId.Value; // Lưu lại ID để in đậm menu
+            }
+
+            // Đếm tổng số món và tính số trang
+            int totalItems = await query.CountAsync();
+            ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            ViewBag.CurrentPage = page;
+
+            // Cắt đúng 9 món đem ra View
+            viewModel.AllProducts = await query
+                .OrderByDescending(m => m.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
             return View(viewModel);
         }
@@ -47,21 +66,22 @@ namespace WebsiteBanDoAnVat.Controllers
             return View(monAn);
         }
 
-        // Thêm tham số minPrice và maxPrice vào đây
-        public async Task<IActionResult> SanPham(string filter, decimal? minPrice, decimal? maxPrice)
+        // ĐÃ CẬP NHẬT: Thêm tham số categoryId và page để xử lý phân trang & bấm từ trang chủ sang
+        public async Task<IActionResult> SanPham(int? categoryId, string filter, decimal? minPrice, decimal? maxPrice, int page = 1)
         {
+            int pageSize = 9; // Giới hạn 9 món / 1 trang
             var query = _context.MonAns.Where(m => m.IsAvailable).AsQueryable();
 
-            // Lọc theo khoảng giá nếu có dữ liệu truyền vào
-            if (minPrice.HasValue)
+            // Lọc theo danh mục (Khi bấm từ trang Index hoặc thanh menu trái)
+            if (categoryId.HasValue)
             {
-                query = query.Where(m => m.Price >= minPrice.Value);
+                query = query.Where(m => m.CategoryId == categoryId.Value);
+                ViewBag.CurrentCategoryId = categoryId.Value;
             }
 
-            if (maxPrice.HasValue)
-            {
-                query = query.Where(m => m.Price <= maxPrice.Value);
-            }
+            // Lọc theo khoảng giá
+            if (minPrice.HasValue) query = query.Where(m => m.Price >= minPrice.Value);
+            if (maxPrice.HasValue) query = query.Where(m => m.Price <= maxPrice.Value);
 
             switch (filter)
             {
@@ -78,18 +98,38 @@ namespace WebsiteBanDoAnVat.Controllers
                     query = query.Where(m => m.Price < 50000);
                     break;
                 default:
+                    query = query.OrderByDescending(m => m.Id);
                     break;
             }
 
-            return View(await query.ToListAsync());
+            // XỬ LÝ PHÂN TRANG
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var products = await query
+                                .Skip((page - 1) * pageSize)
+                                .Take(pageSize)
+                                .ToListAsync();
+
+            // Truyền dữ liệu ra View
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalItems = totalItems;
+            ViewBag.Categories = await _context.Categories.ToListAsync();
+
+            ViewBag.Filter = filter;
+            ViewBag.MinPrice = minPrice;
+            ViewBag.MaxPrice = maxPrice;
+
+            return View(products);
         }
 
         public IActionResult Cart()
         {
-            // Lấy giỏ hàng từ Session hoặc cứ tạo một danh sách trống để tránh lỗi Model null
             var cart = GetCartItems();
             return View(cart);
         }
+
         [HttpPost]
         public IActionResult AddToCart(int productId, int quantity = 1)
         {
@@ -122,19 +162,16 @@ namespace WebsiteBanDoAnVat.Controllers
         [HttpPost]
         public async Task<IActionResult> Checkout(string customerName, string phone, string address, string cartJson)
         {
-            // 1. Kiểm tra dữ liệu đầu vào
             if (string.IsNullOrEmpty(cartJson) || cartJson == "[]")
             {
                 return RedirectToAction("Cart");
             }
 
-            // 2. Giải mã JSON từ JavaScript gửi lên thành danh sách đối tượng C#
             var cartItems = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
 
-            // 3. Tạo mới một Đơn hàng (Order)
             var order = new Order
             {
-                CustomerName = customerName, // "Khách vãng lai" từ form ẩn
+                CustomerName = customerName,
                 PhoneNumber = phone,
                 Address = address,
                 OrderDate = DateTime.Now,
@@ -143,15 +180,14 @@ namespace WebsiteBanDoAnVat.Controllers
             };
 
             _context.Orders.Add(order);
-            await _context.SaveChangesAsync(); // Lưu để lấy được OrderId tự tăng
+            await _context.SaveChangesAsync();
 
-            // 4. Lưu chi tiết từng món ăn vào bảng OrderDetails
             foreach (var item in cartItems)
             {
                 var orderDetail = new OrderDetail
                 {
                     OrderId = order.Id,
-                    MonAnId = item.ProductId, // Phải khớp với ID món ăn trong DB
+                    MonAnId = item.ProductId,
                     Quantity = item.Quantity,
                     UnitPrice = item.Price
                 };
@@ -159,8 +195,6 @@ namespace WebsiteBanDoAnVat.Controllers
             }
 
             await _context.SaveChangesAsync();
-
-            // 5. Trình diễn trang thông báo thành công
             return View("OrderSuccess");
         }
 
@@ -169,6 +203,21 @@ namespace WebsiteBanDoAnVat.Controllers
             var sessionCart = HttpContext.Session.GetString("Cart");
             if (sessionCart != null) return JsonConvert.DeserializeObject<List<CartItem>>(sessionCart);
             return new List<CartItem>();
+        }
+        // BỔ SUNG: API phục vụ thanh tìm kiếm trực tiếp trên Header
+        [HttpGet]
+        public async Task<IActionResult> SearchProducts(string keyword)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+                return Json(new List<object>());
+
+            var results = await _context.MonAns
+                .Where(m => m.Name.Contains(keyword) && m.IsAvailable)
+                .Take(10) // Giới hạn xổ ra 10 kết quả cho đẹp
+                .Select(m => new { id = m.Id, name = m.Name })
+                .ToListAsync();
+
+            return Json(results);
         }
 
         public IActionResult GioiThieu() => View();

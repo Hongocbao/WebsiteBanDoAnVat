@@ -5,30 +5,37 @@
         <div class="col-lg-3 mb-4">
             <div class="card border-0 shadow-sm p-3" style="border-radius: 20px; position: sticky; top: 20px;">
                 <h5 class="fw-bold mb-3" style="color: #ff4d4d;"><i class="fas fa-utensils me-2"></i>Danh Mục</h5>
+
                 <div class="list-group list-group-flush category-menu">
-                    <a asp-action="SanPham" class="list-group-item list-group-item-action border-0 px-0 py-2">
+                    <a asp-action="SanPham" asp-route-categoryId="" asp-route-filter="@ViewBag.Filter"
+                       class="list-group-item list-group-item-action border-0 px-0 py-2 @(ViewBag.CurrentCategoryId == null ? "fw-bold text-danger" : "")">
                         <i class="fas fa-chevron-right me-2 small"></i> Tất cả món ăn
                     </a>
-                    <a href="#" class="list-group-item list-group-item-action border-0 px-0 py-2">
-                        <i class="fas fa-chevron-right me-2 small"></i> Đồ ăn vặt khô
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action border-0 px-0 py-2">
-                        <i class="fas fa-chevron-right me-2 small"></i> Trà sữa & Đồ uống
-                    </a>
-                </div>
 
+                    @if (ViewBag.Categories != null)
+                    {
+                        foreach (var cat in ViewBag.Categories)
+                        {
+                            <a asp-action="SanPham" asp-route-categoryId="@cat.Id" asp-route-filter="@ViewBag.Filter"
+                               class="list-group-item list-group-item-action border-0 px-0 py-2 @(ViewBag.CurrentCategoryId == cat.Id ? "fw-bold text-danger" : "")">
+                                <i class="fas fa-chevron-right me-2 small"></i> @cat.Name
+                            </a>
+                        }
+                    }
+                </div>
                 <hr>
                 <h5 class="fw-bold mb-3" style="color: #ff4d4d;"><i class="fas fa-filter me-2"></i>Lọc theo giá</h5>
                 <form asp-action="SanPham" method="get" class="d-flex flex-column gap-2">
-                    <input type="hidden" name="filter" value="@Context.Request.Query["filter"]" />
+                    <input type="hidden" name="filter" value="@ViewBag.Filter" />
+                    <input type="hidden" name="categoryId" value="@ViewBag.CurrentCategoryId" />
 
                     <div class="input-group input-group-sm">
                         <span class="input-group-text">Từ</span>
-                        <input type="number" name="minPrice" class="form-control" placeholder="0" value="@Context.Request.Query["minPrice"]">
+                        <input type="number" name="minPrice" class="form-control" placeholder="0" value="@ViewBag.MinPrice">
                     </div>
                     <div class="input-group input-group-sm">
                         <span class="input-group-text">Đến</span>
-                        <input type="number" name="maxPrice" class="form-control" placeholder="VND" value="@Context.Request.Query["maxPrice"]">
+                        <input type="number" name="maxPrice" class="form-control" placeholder="VND" value="@ViewBag.MaxPrice">
                     </div>
                     <button type="submit" class="btn btn-sm btn-danger rounded-pill mt-1">Áp dụng lọc</button>
                     <a asp-action="SanPham" class="btn btn-sm btn-link text-muted" style="text-decoration:none">Xóa lọc</a>
@@ -38,18 +45,18 @@
 
         <div class="col-lg-9">
             <div class="d-flex flex-wrap gap-2 mb-4 justify-content-center">
-                <a asp-action="SanPham" asp-route-filter="" class="btn btn-outline-secondary rounded-pill px-4">Tất cả</a>
-                <a asp-action="SanPham" asp-route-filter="banchay" class="btn btn-outline-danger rounded-pill px-4">🔥 Bán chạy</a>
-                <a asp-action="SanPham" asp-route-filter="moinhat" class="btn btn-outline-primary rounded-pill px-4">✨ Mới nhất</a>
-                <a asp-action="SanPham" asp-route-filter="hot" class="btn btn-outline-warning rounded-pill px-4">🌟 Đang HOT</a>
-                <a asp-action="SanPham" asp-route-filter="giamgia" class="btn btn-outline-success rounded-pill px-4">💸 Giảm giá</a>
+                <a asp-action="SanPham" asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="" class="btn btn-outline-secondary rounded-pill px-4">Tất cả</a>
+                <a asp-action="SanPham" asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="banchay" class="btn btn-outline-danger rounded-pill px-4">🔥 Bán chạy</a>
+                <a asp-action="SanPham" asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="moinhat" class="btn btn-outline-primary rounded-pill px-4">✨ Mới nhất</a>
+                <a asp-action="SanPham" asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="hot" class="btn btn-outline-warning rounded-pill px-4">🌟 Đang HOT</a>
+                <a asp-action="SanPham" asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="giamgia" class="btn btn-outline-success rounded-pill px-4">💸 Giảm giá</a>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="text-uppercase fw-bold fs-4" style="color: #ff4d4d; border-left: 5px solid #ff4d4d; padding-left: 15px;">
                     Thực Đơn Ăn Vặt
                 </h2>
-                <span class="badge bg-danger rounded-pill">@Model.Count() món</span>
+                <span class="badge bg-danger rounded-pill">@ViewBag.TotalItems món</span>
             </div>
 
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
@@ -58,7 +65,8 @@
                     <div class="col">
                         <div class="card h-100 border-0 shadow-sm product-card" style="border-radius: 15px; overflow: hidden; transition: 0.3s;">
                             <div class="position-relative">
-                                <img src="@item.ImageUrl" class="card-img-top" alt="@item.Name" style="height: 200px; object-fit: cover;">
+                                <img src="@item.ImageUrl" class="card-img-top" alt="@item.Name" style="height: 200px; object-fit: cover;" onerror="this.onerror=null; this.src='/images/no-image.png';">
+
                                 @if (item.IsBestSeller)
                                 {
                                     <span class="position-absolute top-0 start-0 m-2 badge bg-danger">Bán chạy</span>
@@ -87,6 +95,40 @@
                     </div>
                 }
             </div>
+
+            @if (ViewBag.TotalPages > 1)
+            {
+                <nav aria-label="Page navigation" class="mt-5">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                            <a class="page-link rounded-circle mx-1 border-0 shadow-sm text-danger"
+                               asp-action="SanPham" asp-route-page="@(ViewBag.CurrentPage - 1)"
+                               asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="@ViewBag.Filter" asp-route-minPrice="@ViewBag.MinPrice" asp-route-maxPrice="@ViewBag.MaxPrice">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                <a class="page-link rounded-circle mx-1 border-0 shadow-sm @(i == ViewBag.CurrentPage ? "bg-danger border-danger text-white" : "text-danger")"
+                                   asp-action="SanPham" asp-route-page="@i"
+                                   asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="@ViewBag.Filter" asp-route-minPrice="@ViewBag.MinPrice" asp-route-maxPrice="@ViewBag.MaxPrice">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                            <a class="page-link rounded-circle mx-1 border-0 shadow-sm text-danger"
+                               asp-action="SanPham" asp-route-page="@(ViewBag.CurrentPage + 1)"
+                               asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="@ViewBag.Filter" asp-route-minPrice="@ViewBag.MinPrice" asp-route-maxPrice="@ViewBag.MaxPrice">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            }
         </div>
     </div>
 </div>
