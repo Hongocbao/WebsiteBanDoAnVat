@@ -1,0 +1,29 @@
+﻿@model WebsiteBanDoAnVat.Models.Category
+@{
+    ViewData["Title"] = "Thêm danh mục";
+}
+
+<div class="container mt-5">
+    <div class="card shadow border-0">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">THÊM DANH MỤC MỚI</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="CategoryCreate" method="post">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Tên danh mục</label>
+                    <input asp-for="Name" class="form-control" placeholder="Nhập tên loại món ăn..." />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Mô tả</label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-danger">Lưu danh mục</button>
+                    <a asp-action="Category" class="btn btn-light border">Quay lại</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

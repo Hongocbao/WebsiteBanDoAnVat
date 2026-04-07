@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using WebsiteBanDoAnVat.Models
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
@@ -11,7 +12,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-
         :root {
             --brand-red: #ff4757;
             --dark-blue: #2f3542;
@@ -49,7 +49,7 @@
         .search-wrapper {
             max-width: 500px;
             width: 100%;
-            position: relative; /* Thả dropdown xuống */
+            position: relative;
         }
 
         .search-input-custom {
@@ -100,10 +100,6 @@
             transition: 0.2s;
         }
 
-            .search-item:last-child {
-                border-bottom: none;
-            }
-
             .search-item:hover {
                 background-color: #fff1f2;
                 color: var(--brand-red);
@@ -116,7 +112,6 @@
             color: var(--dark-blue);
             font-weight: 600;
         }
-        /* ------------------------------- */
 
         .header-actions {
             display: flex;
@@ -125,7 +120,7 @@
         }
 
         .user-account-box {
-            background: #f1f2f6;
+            background: #fff;
             padding: 5px 15px;
             border-radius: 50px;
             font-size: 0.9rem;
@@ -134,16 +129,6 @@
             align-items: center;
             border: 1px solid #dfe4ea;
         }
-
-            .user-account-box a {
-                color: var(--dark-blue);
-                text-decoration: none;
-                font-weight: 600;
-            }
-
-                .user-account-box a:hover {
-                    color: var(--brand-red);
-                }
 
         .cart-circle-btn {
             width: 45px;
@@ -232,22 +217,22 @@
                 footer a:hover {
                     color: var(--brand-red);
                 }
-        /* Nút Messenger nổi */
+
         .fb-messenger-fixed {
             position: fixed;
-            bottom: 30px; /* Cách đáy 30px */
-            right: 30px; /* Cách phải 30px */
+            bottom: 30px;
+            right: 30px;
             z-index: 9999;
             transition: all 0.3s ease;
         }
 
             .fb-messenger-fixed:hover {
-                transform: scale(1.1); /* Phóng to nhẹ khi di chuột vào */
+                transform: scale(1.1);
                 filter: brightness(1.1);
             }
 
         .fb-messenger-img {
-            width: 60px; /* Độ to của nút */
+            width: 60px;
             height: 60px;
             border-radius: 50%;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
@@ -255,11 +240,13 @@
     </style>
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<a href="https://m.me/61573289340420" target="_blank" class="fb-messenger-fixed">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/b/be/Facebook_Messenger_logo_2020.svg"
-         alt="Messenger" class="fb-messenger-img">
-</a>
+
 <body>
+    <a href="https://m.me/61573289340420" target="_blank" class="fb-messenger-fixed">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/b/be/Facebook_Messenger_logo_2020.svg"
+             alt="Messenger" class="fb-messenger-img">
+    </a>
+
     <header id="mainHeader">
         <div class="header-main">
             <div class="container d-flex align-items-center justify-content-between">
@@ -308,11 +295,10 @@
                     </li>
 
                     <li><a class="nav-link-custom @(ViewContext.RouteData.Values["Action"]?.ToString() == "LienHe" ? "active" : "")" asp-controller="Home" asp-action="LienHe">Liên hệ</a></li>
-
                     <li><a class="nav-link-custom @(ViewContext.RouteData.Values["Action"]?.ToString() == "Cart" ? "active" : "")" asp-controller="Home" asp-action="Cart">Giỏ hàng</a></li>
 
-                    @* --- PHẦN MENU DÀNH RIÊNG CHO ADMIN ĐÃ LẤY CỦA BẠN KIA VÀO --- *@
-                    @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                    @* MENU QUẢN TRỊ - CẬP NHẬT TỪ BẠN ÔNG (CÓ SUPERADMIN) *@
+                    @if (SignInManager.IsSignedIn(User) && (User.IsInRole("Admin") || User.HasClaim("IsSuperAdmin", "True")))
                     {
                         <li class="nav-item dropdown">
                             <a class="nav-link-custom dropdown-toggle fw-bold text-warning" href="#" id="adminManageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: rgba(0,0,0,0.15);">
@@ -342,15 +328,6 @@
         </div>
     </main>
 
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
-        <div id="cartToast" class="toast align-items-center text-dark bg-white border-0 shadow-sm rounded-3" role="alert">
-            <div class="d-flex p-2">
-                <div class="toast-body fw-bold fs-6" id="toastMessage"></div>
-                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-    </div>
-
     <div class="offcanvas offcanvas-end shadow offcanvas-cart" tabindex="-1" id="cartOffcanvas">
         <div class="offcanvas-header border-bottom bg-light">
             <h5 class="offcanvas-title fw-bold text-danger">
@@ -372,6 +349,15 @@
         </div>
     </div>
 
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+        <div id="cartToast" class="toast align-items-center text-dark bg-white border-0 shadow-sm rounded-3" role="alert">
+            <div class="d-flex p-2">
+                <div class="toast-body fw-bold fs-6" id="toastMessage"></div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
     <footer class="border-top">
         <div class="container text-center">
             <div class="row text-start">
@@ -379,17 +365,10 @@
                     <h5 class="fw-bold text-warning">ĂN VẶT FOODIE</h5>
                     <p class="small text-secondary">Chuyên cung cấp các loại đồ ăn vặt chất lượng, đảm bảo vệ sinh an toàn thực phẩm.</p>
                 </div>
-                <div class="col-md-4">
-                    <h5 class="fw-bold text-white">Liên kết nhanh</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="small">Chính sách giao hàng</a></li>
-                        <li><a href="#" class="small">Điều khoản sử dụng</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-4 text-end">
+                <div class="col-md-4 text-end ms-auto">
                     <h5 class="fw-bold text-white">Theo dõi chúng tôi</h5>
                     <a href="https://www.facebook.com/profile.php?id=61573289340420" class="me-3"><i class="fab fa-facebook fa-lg text-white"></i></a>
-                    <a href="https://www.tiktok.com/@@anvat1310"><i class="fab fa-tiktok fa-lg text-white"></i></a>
+                    <a href="https://www.tiktok.com/@@anvat1310"><i class="fab fa-tiktok fa-lg text-white"></i></a> @* THÊM TỪ BẠN ÔNG *@
                 </div>
             </div>
             <hr>
@@ -452,16 +431,10 @@
                         searchResults.style.display = 'none';
                     }
                 });
-
-                searchInput.addEventListener('focus', function () {
-                    if (this.value.trim().length > 0 && searchResults.innerHTML.trim() !== "") {
-                        searchResults.style.display = 'block';
-                    }
-                });
             }
         });
 
-        // --- 3. SCRIPT GIỎ HÀNG ĐÃ ĐƯỢC TỐI ƯU GIAO DIỆN TỪ BÀI CỦA BẠN KIA ---
+        // --- 3. SCRIPT GIỎ HÀNG (FULL LOGIC CỦA ÔNG) ---
         document.addEventListener("DOMContentLoaded", function () {
             let cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
 
@@ -499,7 +472,6 @@
                         item.quantity -= 1;
                         if (item.quantity <= 0) {
                             cart = cart.filter(i => i.id != id);
-                            showToast(`<i class="fas fa-info-circle text-danger me-2"></i> Đã bỏ sản phẩm khỏi giỏ.`);
                         }
                         saveAndRefresh();
                     }
@@ -510,13 +482,11 @@
                     const idx = remBtn.getAttribute('data-index');
                     cart.splice(idx, 1);
                     saveAndRefresh();
-                    showToast(`<i class="fas fa-trash text-danger me-2"></i> Đã xóa món ăn.`);
                 }
             });
 
             window.updateCartUI = function() {
                 cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
-
                 const badge = document.getElementById('cart-badge');
                 const miniCount = document.getElementById('mini-cart-count');
                 if(badge) badge.innerText = cart.length;
@@ -526,7 +496,7 @@
                 const qtyDisplay = document.getElementById('mini-cart-total-qty');
                 if (qtyDisplay) qtyDisplay.innerText = totalQty + " sản phẩm";
 
-                // Đồng bộ nút Thêm / Cộng Trừ ngoài trang
+                // Đồng bộ nút ngoai trang
                 document.querySelectorAll('[class*="product-action-"]').forEach(container => {
                     const idMatch = container.className.match(/product-action-(\d+)/);
                     if (idMatch) {
@@ -537,23 +507,16 @@
 
                         if (item) {
                             if (addBtn) addBtn.classList.add('d-none');
-                            if (qtyControl) {
-                                qtyControl.classList.remove('d-none');
-                                qtyControl.classList.add('d-flex');
-                            }
+                            if (qtyControl) { qtyControl.classList.remove('d-none'); qtyControl.classList.add('d-flex'); }
                             const qtySpan = container.querySelector(`.item-qty-${id}`);
                             if(qtySpan) qtySpan.innerText = item.quantity;
                         } else {
                             if (addBtn) addBtn.classList.remove('d-none');
-                            if (qtyControl) {
-                                qtyControl.classList.remove('d-flex');
-                                qtyControl.classList.add('d-none');
-                            }
+                            if (qtyControl) { qtyControl.classList.remove('d-flex'); qtyControl.classList.add('d-none'); }
                         }
                     }
                 });
 
-                // Render giỏ hàng thu nhỏ bằng Code giao diện đẹp hơn của bạn kia
                 const container = document.getElementById('mini-cart-items');
                 let totalMoney = 0;
 

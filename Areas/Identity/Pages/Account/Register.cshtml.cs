@@ -55,13 +55,18 @@ namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            [Required]
-            [EmailAddress]
+            // THAY THẾ STUDENTID THÀNH HOTEN
+            [Required(ErrorMessage = "Vui lòng nhập Họ và Tên.")]
+            [Display(Name = "Họ và Tên")]
+            public string HoTen { get; set; }
+
+            [Required(ErrorMessage = "Vui lòng nhập Email.")]
+            [EmailAddress(ErrorMessage = "Email không đúng định dạng.")]
             [Display(Name = "Email")]
             public string Email { get; set; }
 
-            [Required]
-            [StringLength(100, ErrorMessage = "Mật khẩu phải từ {2} ký tự.", MinimumLength = 6)]
+            [Required(ErrorMessage = "Vui lòng nhập mật khẩu.")]
+            [StringLength(100, ErrorMessage = "Mật khẩu phải từ {2} đến {1} ký tự.", MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
             public string Password { get; set; }
@@ -71,8 +76,11 @@ namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
             [Compare("Password", ErrorMessage = "Mật khẩu xác nhận không khớp.")]
             public string ConfirmPassword { get; set; }
 
-            public string UserRole { get; set; } = "Customer";
-            public string? StudentId { get; set; }
+            // Giữ lại để xử lý phân quyền Admin nếu cần
+            public string UserRole { get; set; }
+
+            [Display(Name = "Địa chỉ")]
+            public string? DiaChi { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -85,15 +93,18 @@ namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
 
+                // GÁN THÔNG TIN MỚI VÀO DATABASE
+                user.HoTen = Input.HoTen;
+                user.DiaChi = Input.DiaChi;
+                user.NgayDangKy = DateTime.Now;
+
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-
-                user.MaSinhVien = Input.StudentId;
-                user.IsSinhVien = (Input.UserRole == "Student");
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
@@ -101,11 +112,23 @@ namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("Đã tạo tài khoản mới thành công.");
 
-                    if (!await _roleManager.RoleExistsAsync(Input.UserRole))
+                    // Mặc định cho mọi tài khoản mới là Customer
+                    string roleName = "Customer";
+
+                    // Logic phân quyền đơn giản
+                    if (!string.IsNullOrEmpty(Input.UserRole) && Input.UserRole.Contains("Admin"))
                     {
-                        await _roleManager.CreateAsync(new IdentityRole(Input.UserRole));
+                        roleName = "Admin";
+                        user.IsAdmin = true;
+                        await _userManager.UpdateAsync(user);
                     }
-                    await _userManager.AddToRoleAsync(user, Input.UserRole);
+
+                    if (!await _roleManager.RoleExistsAsync(roleName))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole(roleName));
+                    }
+
+                    await _userManager.AddToRoleAsync(user, roleName);
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
@@ -117,11 +140,13 @@ namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
                         return LocalRedirect(returnUrl);
                     }
                 }
+
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
+
             return Page();
         }
 
@@ -133,12 +158,16 @@ namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
             }
             catch
             {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'.");
+                throw new InvalidOperationException($"Không thể tạo instance cho '{nameof(ApplicationUser)}'.");
             }
         }
 
         private IUserEmailStore<ApplicationUser> GetEmailStore()
         {
+            if (!_userManager.SupportsUserEmail)
+            {
+                throw new NotSupportedException("Default UI yêu cầu User Store có hỗ trợ Email.");
+            }
             return (IUserEmailStore<ApplicationUser>)_userStore;
         }
     }

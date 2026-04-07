@@ -1,16 +1,20 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System;
 
 namespace WebsiteBanDoAnVat.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        // Giữ nguyên của bạn
-        public string? MaSinhVien { get; set; }
-        public bool IsSinhVien { get; set; }
+        // === THÔNG TIN CƠ BẢN (Dùng để hiển thị thay cho 'Khách ngoài') ===
+        public string? HoTen { get; set; }
+        public string? DiaChi { get; set; }
+        public string? AvatarUrl { get; set; } = "/images/default-avatar.png";
 
-        // Thêm mới để phục vụ logic quản lý và hiển thị
-        public string? HoTen { get; set; } // Để hiện tên thay vì dùng Email
-        public DateTime NgayDangKy { get; set; } = DateTime.Now; // Để sắp xếp khách mới lên đầu
-        public bool IsActive { get; set; } = true; // Phục vụ logic Soft Delete
+        // === THÔNG TIN HỆ THỐNG ===
+        public DateTime NgayDangKy { get; set; } = DateTime.Now;
+        public bool IsActive { get; set; } = true;
+        public bool IsAdmin { get; set; } = false;
+        // THÊM DÒNG NÀY: Để đánh dấu tài khoản Gốc không thể bị xóa/hạ cấp
+        public bool IsSuperAdmin { get; set; } = false;
     }
 }

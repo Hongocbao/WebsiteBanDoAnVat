@@ -1,15 +1,26 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using WebsiteBanDoAnVat.Models
-
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
 <ul class="navbar-nav flex-row align-items-center m-0 p-0">
     @if (SignInManager.IsSignedIn(User))
     {
+        // Lấy thông tin user để hiển thị Avatar và Họ Tên thật
+        var user = await UserManager.GetUserAsync(User);
+
         <li class="nav-item">
-            <a class="nav-link text-dark fw-bold px-2" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">
-                <i class="fas fa-user-circle text-danger me-1"></i> Chào @User.Identity?.Name!
+            @* --- CHỖ SỬA QUAN TRỌNG: Trỏ về ProfileController --- *@
+            <a class="nav-link text-dark fw-bold px-2 d-flex align-items-center" asp-area="" asp-controller="Profile" asp-action="Index" title="Hồ sơ cá nhân">
+                @if (user != null && !string.IsNullOrEmpty(user.AvatarUrl))
+                {
+                    <img src="@user.AvatarUrl" class="rounded-circle me-1" style="width:25px; height:25px; object-fit:cover; border: 1px solid #ff4757;">
+                }
+                else
+                {
+                    <i class="fas fa-user-circle text-danger me-1"></i>
+                }
+                Chào @(user?.HoTen ?? User.Identity?.Name)!
             </a>
         </li>
         <li class="nav-item">

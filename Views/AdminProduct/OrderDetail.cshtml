@@ -1,0 +1,78 @@
+﻿@model WebsiteBanDoAnVat.Models.Order
+
+@{
+    ViewData["Title"] = "Chi tiết hóa đơn";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="AdminProduct" asp-action="OrderManagement">Quản lý hóa đơn</a></li>
+            <li class="breadcrumb-item active">Chi tiết #@Model.Id</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow border-0">
+        <div class="card-header bg-danger text-white py-3">
+            <h5 class="mb-0 fw-bold">CHI TIẾT HÓA ĐƠN #@Model.Id</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-sm-6">
+                    <p class="mb-1 text-muted">Khách hàng:</p>
+                    <h6 class="fw-bold">@Model.CustomerName</h6>
+                    <p class="small text-muted">SĐT: @Model.PhoneNumber</p>
+                    <p class="small text-muted">Địa chỉ: @Model.Address</p>
+                </div>
+                <div class="col-sm-6 text-sm-end">
+                    <p class="mb-1 text-muted">Ngày đặt:</p>
+                    <h6 class="fw-bold">@Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</h6>
+                    <span class="badge @(Model.Status == "Chờ duyệt" ? "bg-warning text-dark" : "bg-success")">
+                        @Model.Status
+                    </span>
+                </div>
+            </div>
+
+            <table class="table table-bordered align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th>Tên món ăn</th>
+                        <th class="text-center">Số lượng</th>
+                        <th class="text-end">Đơn giá</th>
+                        <th class="text-end">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.OrderDetails != null)
+                    {
+                        foreach (var item in Model.OrderDetails)
+                        {
+                            <tr>
+                                <td>@(item.MonAn?.Name ?? "Sản phẩm không tồn tại")</td>
+                                <td class="text-center">@item.Quantity</td>
+                                @* ĐÃ SỬA: Dùng UnitPrice để khớp với file OrderDetail.cs của Bảo *@
+                                <td class="text-end">@item.UnitPrice.ToString("N0")đ</td>
+                                <td class="text-end fw-bold">@((item.Quantity * item.UnitPrice).ToString("N0"))đ</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end fw-bold">TỔNG CỘNG:</td>
+                        <td class="text-end fw-bold text-danger fs-5">@Model.TotalAmount.ToString("N0") VNĐ</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div class="text-end mt-3 no-print">
+                <a asp-controller="AdminProduct" asp-action="OrderManagement" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+                <button class="btn btn-secondary" onclick="window.print()">
+                    <i class="fas fa-print"></i> In hóa đơn
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

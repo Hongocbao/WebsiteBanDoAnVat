@@ -1,0 +1,76 @@
+﻿@model WebsiteBanDoAnVat.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Chi tiết người dùng";
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="KhachHang">Quản lý khách hàng</a></li>
+            <li class="breadcrumb-item active">Thông tin chi tiết</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
+                    <h4 class="mb-0">HỒ SƠ NGƯỜI DÙNG</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="position-relative d-inline-block">
+                            <img src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/images/default-avatar.png" : Model.AvatarUrl)"
+                                 class="rounded-circle img-thumbnail shadow" width="130" height="130" style="object-fit: cover;">
+                            @if (Model.IsAdmin)
+                            {
+                                <span class="position-absolute bottom-0 end-0 badge rounded-pill bg-warning text-dark border border-white">
+                                    <i class="fas fa-shield-alt"></i> Admin
+                                </span>
+                            }
+                        </div>
+                        <h3 class="mt-3 fw-bold">@Model.HoTen</h3>
+                        <span class="text-muted">@Model.Email</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="small text-muted">Số điện thoại</label>
+                            <div class="fw-bold">@(Model.PhoneNumber ?? "Chưa cập nhật")</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="small text-muted">Trạng thái</label>
+                            <div>
+                                @if (Model.IsActive)
+                                {
+                                    <span class="text-success"><i class="fas fa-check-circle me-1"></i>Đang hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="text-danger"><i class="fas fa-times-circle me-1"></i>Đã khóa</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="small text-muted">Địa chỉ giao hàng</label>
+                            <div class="p-2 bg-light rounded border">
+                                <i class="fas fa-map-marker-alt text-danger me-2"></i>@(Model.DiaChi ?? "Người dùng chưa cập nhật địa chỉ")
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="small text-muted">Ngày đăng ký hệ thống</label>
+                            <div class="fw-bold"><i class="far fa-calendar-alt me-2"></i>@Model.NgayDangKy.ToString("dd/MM/yyyy HH:mm")</div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <a asp-action="KhachHang" class="btn btn-dark rounded-pill">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

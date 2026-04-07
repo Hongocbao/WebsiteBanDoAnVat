@@ -13,10 +13,8 @@ namespace WebsiteBanDoAnVat.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _hostEnvironment;
-        // BỔ SUNG: Khai báo UserManager để quản lý khách hàng
         private readonly UserManager<ApplicationUser> _userManager;
 
-        // Cập nhật Constructor để nhận UserManager
         public AdminProductController(
             AppDbContext context,
             IWebHostEnvironment hostEnvironment,
@@ -28,18 +26,18 @@ namespace WebsiteBanDoAnVat.Controllers
         }
 
         // ==========================================
-        // 1. DANH SÁCH & THÊM MỚI
+        // 1. QUẢN LÝ SẢN PHẨM (MÓN ĂN)
         // ==========================================
         public async Task<IActionResult> Index()
         {
-            var products = await _context.MonAns.Include(m => m.Category).ToListAsync();
-            return View(products);
+            var products = await _context.MonAns.Include(m => m.Category).AsNoTracking().ToListAsync();
+            return View("Index", products);
         }
 
         public IActionResult Create()
         {
             ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name");
-            return View();
+            return View("Create");
         }
 
         [HttpPost]
@@ -48,30 +46,22 @@ namespace WebsiteBanDoAnVat.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (imageFile != null)
-                {
-                    monAn.ImageUrl = await SaveImage(imageFile);
-                }
+                if (imageFile != null) monAn.ImageUrl = await SaveImage(imageFile, "products");
                 _context.Add(monAn);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", monAn.CategoryId);
-            return View(monAn);
+            return View("Create", monAn);
         }
 
-        // ==========================================
-        // 2. CẬP NHẬT (EDIT)
-        // ==========================================
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
-
             var monAn = await _context.MonAns.FindAsync(id);
             if (monAn == null) return NotFound();
-
             ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", monAn.CategoryId);
-            return View(monAn);
+            return View("Edit", monAn);
         }
 
         [HttpPost]
@@ -86,11 +76,8 @@ namespace WebsiteBanDoAnVat.Controllers
                 {
                     if (imageFile != null)
                     {
-                        if (!string.IsNullOrEmpty(monAn.ImageUrl))
-                        {
-                            DeleteOldImage(monAn.ImageUrl);
-                        }
-                        monAn.ImageUrl = await SaveImage(imageFile);
+                        if (!string.IsNullOrEmpty(monAn.ImageUrl)) DeleteOldImage(monAn.ImageUrl);
+                        monAn.ImageUrl = await SaveImage(imageFile, "products");
                     }
                     _context.Update(monAn);
                     await _context.SaveChangesAsync();
@@ -103,105 +90,135 @@ namespace WebsiteBanDoAnVat.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", monAn.CategoryId);
-            return View(monAn);
+            return View("Edit", monAn);
         }
 
         // ==========================================
-        // 3. XÓA (DELETE MÓN ĂN)
-        // ==========================================
-        [HttpPost]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var monAn = await _context.MonAns.FindAsync(id);
-            if (monAn != null)
-            {
-                if (!string.IsNullOrEmpty(monAn.ImageUrl))
-                {
-                    DeleteOldImage(monAn.ImageUrl);
-                }
-                _context.MonAns.Remove(monAn);
-                await _context.SaveChangesAsync();
-            }
-            return RedirectToAction(nameof(Index));
-        }
-
-        // ==========================================
-        // QUẢN LÝ ĐƠN HÀNG
+        // 2. QUẢN LÝ ĐƠN HÀNG & DOANH THU
         // ==========================================
         public async Task<IActionResult> OrderManagement()
         {
-            var orders = await _context.Orders.OrderByDescending(o => o.OrderDate).ToListAsync();
-            return View(orders);
+            var orders = await _context.Orders.OrderByDescending(o => o.OrderDate).AsNoTracking().ToListAsync();
+            return View("~/Views/Home/OrderManagement.cshtml", orders);
         }
 
-        public IActionResult DoanhThu()
-        {
-            decimal tongDoanhThu = _context.Orders.Sum(o => o.TotalAmount);
-            int tongDonHang = _context.Orders.Count();
-
-            ViewBag.TotalRevenue = tongDoanhThu;
-            ViewBag.TotalOrders = tongDonHang;
-
-            var recentOrders = _context.Orders.OrderByDescending(o => o.OrderDate).Take(10).ToList();
-            return View(recentOrders);
-        }
-
-        // ==========================================
-        // TRANG KHÁCH HÀNG (Sửa lỗi _userManager)
-        // ==========================================
-        public async Task<IActionResult> KhachHang(string searchTerm)
-        {
-            var query = _userManager.Users.Where(u => u.IsActive).AsQueryable();
-
-            if (!string.IsNullOrEmpty(searchTerm))
-            {
-                query = query.Where(u => (u.HoTen != null && u.HoTen.Contains(searchTerm))
-                                      || (u.PhoneNumber != null && u.PhoneNumber.Contains(searchTerm))
-                                      || (u.MaSinhVien != null && u.MaSinhVien.Contains(searchTerm)));
-                ViewBag.SearchTerm = searchTerm;
-            }
-
-            var list = await query.OrderByDescending(u => u.NgayDangKy).ToListAsync();
-            return View(list);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> DeleteKhachHang(string id)
-        {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user != null)
-            {
-                user.IsActive = false;
-                await _userManager.UpdateAsync(user);
-            }
-            return RedirectToAction(nameof(KhachHang));
-        }
-
-        public async Task<IActionResult> ChiTietHoaDon(int? id)
+        public async Task<IActionResult> OrderDetail(int? id)
         {
             if (id == null) return NotFound();
             var order = await _context.Orders
                 .Include(o => o.OrderDetails!)
                 .ThenInclude(d => d.MonAn)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
-            return order == null ? NotFound() : View(order);
+            if (order == null) return NotFound();
+            return View("OrderDetail", order);
         }
 
-        // Helper Methods
-        private async Task<string> SaveImage(IFormFile imageFile)
+        public IActionResult DoanhThu()
+        {
+            var recentOrders = _context.Orders.OrderByDescending(o => o.OrderDate).Take(10).AsNoTracking().ToList();
+            ViewBag.TotalRevenue = _context.Orders.Sum(o => o.TotalAmount);
+            ViewBag.TotalOrders = _context.Orders.Count();
+            return View("DoanhThu", recentOrders);
+        }
+
+        // ==========================================
+        // 3. KHÁCH HÀNG & PHÂN QUYỀN
+        // ==========================================
+        public async Task<IActionResult> KhachHang(string searchTerm)
+        {
+            var query = _userManager.Users.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(u => (u.HoTen != null && u.HoTen.Contains(searchTerm))
+                                      || (u.PhoneNumber != null && u.PhoneNumber.Contains(searchTerm))
+                                      || (u.Email != null && u.Email.Contains(searchTerm)));
+            }
+
+            var list = await query.OrderByDescending(u => u.NgayDangKy).ToListAsync();
+            return View("KhachHang", list);
+        }
+
+        // Logic xem chi tiết một khách hàng cụ thể
+        public async Task<IActionResult> UserDetail(string id)
+        {
+            if (id == null) return NotFound();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            return View(user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleAdminRole(string userId)
+        {
+            // 1. Lấy thông tin người thực hiện
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            // 2. Kiểm tra quyền SuperAdmin
+            if (currentUser == null || !currentUser.IsSuperAdmin)
+            {
+                TempData["Error"] = "Chỉ Quản trị viên tối cao mới có quyền thay đổi vai trò!";
+                return RedirectToAction(nameof(KhachHang));
+            }
+
+            var targetUser = await _userManager.FindByIdAsync(userId);
+            if (targetUser == null) return NotFound();
+
+            // 3. Bảo vệ tài khoản SuperAdmin
+            if (targetUser.IsSuperAdmin)
+            {
+                TempData["Error"] = "Không thể tác động lên tài khoản tối cao!";
+                return RedirectToAction(nameof(KhachHang));
+            }
+
+            // LOGIC ĐỔI QUYỀN (Toggle)
+            if (targetUser.IsAdmin)
+            {
+                targetUser.IsAdmin = false;
+                await _userManager.RemoveFromRoleAsync(targetUser, "Admin");
+                await _userManager.AddToRoleAsync(targetUser, "Customer");
+            }
+            else
+            {
+                targetUser.IsAdmin = true;
+                await _userManager.RemoveFromRoleAsync(targetUser, "Customer");
+                await _userManager.AddToRoleAsync(targetUser, "Admin");
+            }
+
+            await _userManager.UpdateAsync(targetUser);
+            TempData["Success"] = $"Đã cập nhật quyền cho {targetUser.Email} thành công!";
+            return RedirectToAction(nameof(KhachHang));
+        }
+
+        // ==========================================
+        // HELPER METHODS (XỬ LÝ ẢNH)
+        // ==========================================
+        private async Task<string> SaveImage(IFormFile imageFile, string subFolder)
         {
             string fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            string uploadPath = Path.Combine(_hostEnvironment.WebRootPath, "images");
+            string uploadPath = Path.Combine(_hostEnvironment.WebRootPath, "images", subFolder);
+
+            // Tự động tạo thư mục nếu chưa tồn tại
             if (!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
-            string filePath = Path.Combine(uploadPath, fileName);
-            using (var stream = new FileStream(filePath, FileMode.Create)) { await imageFile.CopyToAsync(stream); }
-            return "/images/" + fileName;
+
+            string path = Path.Combine(uploadPath, fileName);
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return $"/images/{subFolder}/{fileName}";
         }
 
         private void DeleteOldImage(string imageUrl)
         {
-            string oldPath = Path.Combine(_hostEnvironment.WebRootPath, imageUrl.TrimStart('/'));
-            if (System.IO.File.Exists(oldPath)) System.IO.File.Delete(oldPath);
+            if (string.IsNullOrEmpty(imageUrl) || imageUrl.Contains("default-avatar")) return;
+            string fullPath = Path.Combine(_hostEnvironment.WebRootPath, imageUrl.TrimStart('/'));
+            if (System.IO.File.Exists(fullPath)) System.IO.File.Delete(fullPath);
         }
 
         private bool MonAnExists(int id) => _context.MonAns.Any(e => e.Id == id);
