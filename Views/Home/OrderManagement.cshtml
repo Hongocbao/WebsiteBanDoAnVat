@@ -26,9 +26,7 @@
                         <tr>
                             <td class="ps-3 fw-bold">#@order.Id</td>
                             <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
-                            @* Đã sửa khớp với Model: CustomerName *@
                             <td>@order.CustomerName</td>
-                            @* Đã sửa khớp với Model: PhoneNumber *@
                             <td>@order.PhoneNumber</td>
                             <td class="text-danger fw-bold">@order.TotalAmount.ToString("N0") VNĐ</td>
                             <td>
@@ -37,7 +35,11 @@
                                 </span>
                             </td>
                             <td class="text-center">
-                                <a asp-action="ChiTietHoaDon" asp-route-id="@order.Id" class="btn btn-sm btn-info text-white rounded-pill px-3">
+                                @* ĐÃ SỬA: asp-controller là AdminProduct và asp-action là OrderDetail *@
+                                <a asp-controller="AdminProduct"
+                                   asp-action="OrderDetail"
+                                   asp-route-id="@order.Id"
+                                   class="btn btn-sm btn-info text-white rounded-pill px-3">
                                     <i class="fas fa-eye me-1"></i> Xem chi tiết
                                 </a>
                             </td>

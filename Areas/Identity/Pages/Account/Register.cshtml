@@ -10,44 +10,41 @@
             <div class="card shadow-lg border-0 rounded-4">
                 <div class="card-body p-5">
                     <h2 class="text-center fw-bold text-primary mb-4">Tạo Tài Khoản Mới</h2>
+
                     <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
                         <div class="form-floating mb-3">
-                            <input asp-for="Input.Email" class="form-control rounded-3" placeholder="name@example.com" />
+                            <input asp-for="Input.HoTen" class="form-control rounded-3" placeholder="Nguyễn Văn A" aria-required="true" />
+                            <label asp-for="Input.HoTen">Họ và Tên</label>
+                            <span asp-validation-for="Input.HoTen" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Email" class="form-control rounded-3" placeholder="name@example.com" aria-required="true" />
                             <label asp-for="Input.Email">Email</label>
                             <span asp-validation-for="Input.Email" class="text-danger"></span>
                         </div>
 
                         <div class="form-floating mb-3">
-                            <input asp-for="Input.Password" class="form-control rounded-3" type="password" placeholder="Mật khẩu" />
+                            <input asp-for="Input.Password" class="form-control rounded-3" type="password" placeholder="Mật khẩu" aria-required="true" />
                             <label asp-for="Input.Password">Mật khẩu</label>
                             <span asp-validation-for="Input.Password" class="text-danger"></span>
                         </div>
 
                         <div class="form-floating mb-3">
-                            <input asp-for="Input.ConfirmPassword" class="form-control rounded-3" type="password" placeholder="Xác nhận mật khẩu" />
+                            <input asp-for="Input.ConfirmPassword" class="form-control rounded-3" type="password" placeholder="Xác nhận mật khẩu" aria-required="true" />
                             <label asp-for="Input.ConfirmPassword">Xác nhận mật khẩu</label>
                             <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
                         </div>
 
                         <hr class="my-4 text-muted">
 
-                        <div class="form-floating mb-3">
-                            <select id="roleSelect" name="Input.UserRole" class="form-select rounded-3">
-                                <option value="Customer">Người dùng bình thường</option>
-                                <option value="Student">Sinh viên (Giảm giá 10%)</option>
-                                <option value="Admin">Quản trị viên (Admin)</option>
-                            </select>
-                            <label>Bạn đăng ký với tư cách là:</label>
-                        </div>
+                        <p class="text-muted small text-center mb-4">
+                            Bằng cách đăng ký, bạn đồng ý với các điều khoản sử dụng của Ăn Vặt Foodie.
+                        </p>
 
-                        <div id="studentInfo" style="display:none;" class="form-floating mb-3 animate__animated animate__fadeIn">
-                            <input name="Input.StudentId" class="form-control rounded-3" placeholder="MSSV" />
-                            <label>Mã số sinh viên (Để nhận ưu đãi)</label>
-                        </div>
-
-                        <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary rounded-pill shadow-sm">Đăng Ký Ngay</button>
+                        <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary rounded-pill shadow-sm fw-bold">Đăng Ký Ngay</button>
                     </form>
                 </div>
             </div>
@@ -57,14 +54,4 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        document.getElementById('roleSelect').addEventListener('change', function () {
-            var studentInfo = document.getElementById('studentInfo');
-            if (this.value === 'Student') {
-                studentInfo.style.display = 'block';
-            } else {
-                studentInfo.style.display = 'none';
-            }
-        });
-    </script>
 }

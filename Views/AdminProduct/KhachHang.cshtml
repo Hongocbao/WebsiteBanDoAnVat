@@ -1,37 +1,108 @@
 ﻿@model IEnumerable<WebsiteBanDoAnVat.Models.ApplicationUser>
+@{
+    ViewData["Title"] = "Quản lý Khách hàng";
+    Layout = "_Layout";
+    int sttIndex = 1; // Biến đếm STT không lo trùng lặp
+}
 
-<form method="get" asp-action="KhachHang" class="mb-3">
-    <div class="input-group" style="max-width: 400px;">
-        <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control" placeholder="Tìm tên, SĐT hoặc MSSV...">
-        <button class="btn btn-primary" type="submit">Tìm kiếm</button>
+<div class="container-fluid mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0"><i class="fas fa-users me-2"></i>DANH SÁCH KHÁCH HÀNG</h5>
+            <form asp-action="KhachHang" method="get" class="d-flex">
+                <input type="text" name="searchTerm" class="form-control form-control-sm me-2" placeholder="Tìm tên, email, sđt...">
+                <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+        <div class="card-body p-0">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>@TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center" style="width: 5%">STT</th>
+                            <th style="width: 35%">Thông tin khách hàng</th>
+                            <th style="width: 15%">Số điện thoại</th>
+                            <th class="text-center" style="width: 15%">Vai trò</th>
+                            <th class="text-center" style="width: 10%">Chi tiết</th>
+                            <th class="text-center" style="width: 20%">Quyền quản trị</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td class="text-center fw-bold">@(sttIndex++)</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="@(string.IsNullOrEmpty(user.AvatarUrl) ? "/images/default-avatar.png" : user.AvatarUrl)"
+                                             class="rounded-circle border me-3" width="45" height="45" style="object-fit: cover;">
+                                        <div>
+                                            <div class="fw-bold text-dark">@user.HoTen</div>
+                                            <div class="text-muted small">@user.Email</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><i class="fas fa-phone-alt me-2 small text-secondary"></i>@(user.PhoneNumber ?? "Chưa có")</td>
+                                <td class="text-center">
+                                    @if (user.IsSuperAdmin)
+                                    {
+                                        <span class="badge bg-danger px-3 rounded-pill">Tối cao</span>
+                                    }
+                                    else if (user.IsAdmin)
+                                    {
+                                        <span class="badge bg-warning text-dark px-3 rounded-pill">Quản trị</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-dark border px-3 rounded-pill">Khách hàng</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="UserDetail" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary rounded-circle">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    @if (!user.IsSuperAdmin)
+                                    {
+                                        <form asp-action="ToggleAdminRole" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            @if (user.IsAdmin)
+                                            {
+                                                <button type="submit" class="btn btn-sm btn-outline-danger w-75">Gỡ Admin</button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit" class="btn btn-sm btn-success w-75">Cấp Admin</button>
+                                            }
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small italic">Hệ thống</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-</form>
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Họ và Tên</th>
-            <th>MSSV</th>
-            <th>Số điện thoại</th>
-            <th>Ngày đăng ký</th>
-            <th>Thao tác</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.HoTen</td>
-                <td>@(item.IsSinhVien? item.MaSinhVien: "Khách ngoài")</td>
-                <td>@item.PhoneNumber</td>
-                <td>@item.NgayDangKy.ToString("dd/MM/yyyy")</td>
-                <td>
-                    <form asp-action="DeleteKhachHang" asp-route-id="@item.Id" method="post"
-                          onsubmit="return confirm('Xác nhận xóa khách hàng này?')">
-                        <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+</div>

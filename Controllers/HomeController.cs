@@ -5,6 +5,7 @@ using WebsiteBanDoAnVat.Models;
 using WebsiteBanDoAnVat.Data;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace WebsiteBanDoAnVat.Controllers
 {
@@ -22,99 +23,131 @@ namespace WebsiteBanDoAnVat.Controllers
         public async Task<IActionResult> Index()
         {
             var viewModel = new HomeViewModel();
-
-            // 1. Lấy danh sách danh mục
             viewModel.Categories = await _context.Categories.ToListAsync();
-
-            // 2. Lấy sản phẩm bán chạy (Ví dụ: lấy 4 món có giá cao nhất hoặc mới nhất)
-            // Nếu Bảo có cột IsHot hoặc IsBestSeller trong DB thì dùng .Where(m => m.IsHot)
             viewModel.BestSellers = await _context.MonAns
-                .OrderByDescending(m => m.Id) // Lấy món mới nhất
+                .OrderByDescending(m => m.Id)
                 .Take(4)
                 .ToListAsync();
-
-            // 3. Lấy toàn bộ sản phẩm cho mục phía dưới
             viewModel.AllProducts = await _context.MonAns.ToListAsync();
-
             return View(viewModel);
         }
 
-        public async Task<IActionResult> Details(int? id)
+        // --- QUẢN LÝ SẢN PHẨM (TRANG KHÁCH HÀNG XEM) ---
+        public async Task<IActionResult> SanPham(string searchString, int? categoryId)
+        {
+            var monAns = _context.MonAns.Include(m => m.Category).AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                monAns = monAns.Where(s => s.Name.Contains(searchString));
+            }
+
+            if (categoryId.HasValue)
+            {
+                monAns = monAns.Where(x => x.CategoryId == categoryId);
+            }
+
+            ViewBag.Categories = await _context.Categories.ToListAsync();
+            return View(await monAns.ToListAsync());
+        }
+
+        // --- QUẢN LÝ DANH MỤC ---
+        public async Task<IActionResult> Category()
+        {
+            return View(await _context.Categories.ToListAsync());
+        }
+
+        public IActionResult CategoryCreate() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CategoryCreate(Category category)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(category);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Category));
+            }
+            return View(category);
+        }
+
+        public async Task<IActionResult> CategoryEdit(int? id)
         {
             if (id == null) return NotFound();
-            var monAn = await _context.MonAns.Include(m => m.Category).FirstOrDefaultAsync(m => m.Id == id);
-            if (monAn == null) return NotFound();
-            return View(monAn);
+            var category = await _context.Categories.FindAsync(id);
+            if (category == null) return NotFound();
+            return View(category);
         }
 
-        // Thêm tham số minPrice và maxPrice vào đây
-        public async Task<IActionResult> SanPham(string filter, decimal? minPrice, decimal? maxPrice)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CategoryEdit(int id, Category category)
         {
-            var query = _context.MonAns.Where(m => m.IsAvailable).AsQueryable();
-
-            // Lọc theo khoảng giá nếu có dữ liệu truyền vào
-            if (minPrice.HasValue)
+            if (id != category.Id) return NotFound();
+            if (ModelState.IsValid)
             {
-                query = query.Where(m => m.Price >= minPrice.Value);
+                _context.Update(category);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Category));
             }
-
-            if (maxPrice.HasValue)
-            {
-                query = query.Where(m => m.Price <= maxPrice.Value);
-            }
-
-            switch (filter)
-            {
-                case "banchay":
-                    query = query.Where(m => m.IsBestSeller);
-                    break;
-                case "moinhat":
-                    query = query.OrderByDescending(m => m.Id);
-                    break;
-                case "hot":
-                    query = query.OrderByDescending(m => m.ViewCount).Where(m => m.ViewCount > 0);
-                    break;
-                case "giamgia":
-                    query = query.Where(m => m.Price < 50000);
-                    break;
-                default:
-                    break;
-            }
-
-            return View(await query.ToListAsync());
+            return View(category);
         }
 
-        public IActionResult Cart()
+        [HttpPost]
+        public async Task<IActionResult> CategoryDelete(int id)
         {
-            // Lấy giỏ hàng từ Session hoặc cứ tạo một danh sách trống để tránh lỗi Model null
-            var cart = GetCartItems();
-            return View(cart);
+            var category = await _context.Categories.Include(c => c.MonAns).FirstOrDefaultAsync(c => c.Id == id);
+            if (category != null)
+            {
+                if (category.MonAns.Any())
+                {
+                    TempData["Error"] = "Không thể xóa danh mục này vì đang có món ăn thuộc danh mục này!";
+                    return RedirectToAction(nameof(Category));
+                }
+                _context.Categories.Remove(category);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Category));
         }
+
+        // --- QUẢN LÝ KHÁCH HÀNG & ĐƠN HÀNG (ADMIN) ---
+        public async Task<IActionResult> KhachHang()
+        {
+            var users = await _context.Users.ToListAsync();
+            return View(users);
+        }
+
+        public async Task<IActionResult> OrderManagement()
+        {
+            var orders = await _context.Orders.OrderByDescending(o => o.OrderDate).ToListAsync();
+            return View(orders);
+        }
+
+        public async Task<IActionResult> OrderDetail(int id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(d => d.MonAn)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (order == null) return NotFound();
+            return View(order);
+        }
+
+        // --- QUẢN LÝ GIỎ HÀNG & THANH TOÁN ---
+        public IActionResult Cart() => View(GetCartItems());
+
         [HttpPost]
         public IActionResult AddToCart(int productId, int quantity = 1)
         {
-            var product = _context.MonAns.FirstOrDefault(p => p.Id == productId);
+            var product = _context.MonAns.Find(productId);
             if (product == null) return NotFound();
-
             var cart = GetCartItems();
-            var cartItem = cart.FirstOrDefault(c => c.ProductId == productId);
-
-            if (cartItem == null)
-            {
-                cart.Add(new CartItem
-                {
-                    ProductId = product.Id,
-                    ProductName = product.Name,
-                    Price = product.Price,
-                    Quantity = quantity,
-                    ImageUrl = product.ImageUrl
-                });
-            }
+            var item = cart.FirstOrDefault(c => c.ProductId == productId);
+            if (item == null)
+                cart.Add(new CartItem { ProductId = product.Id, ProductName = product.Name, Price = product.Price, Quantity = quantity, ImageUrl = product.ImageUrl });
             else
-            {
-                cartItem.Quantity += quantity;
-            }
-
+                item.Quantity += quantity;
             HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cart));
             return RedirectToAction("Cart");
         }
@@ -122,53 +155,31 @@ namespace WebsiteBanDoAnVat.Controllers
         [HttpPost]
         public async Task<IActionResult> Checkout(string customerName, string phone, string address, string cartJson)
         {
-            // 1. Kiểm tra dữ liệu đầu vào
-            if (string.IsNullOrEmpty(cartJson) || cartJson == "[]")
-            {
-                return RedirectToAction("Cart");
-            }
-
-            // 2. Giải mã JSON từ JavaScript gửi lên thành danh sách đối tượng C#
+            if (string.IsNullOrEmpty(cartJson) || cartJson == "[]") return RedirectToAction("Cart");
             var cartItems = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
-
-            // 3. Tạo mới một Đơn hàng (Order)
-            var order = new Order
-            {
-                CustomerName = customerName, // "Khách vãng lai" từ form ẩn
-                PhoneNumber = phone,
-                Address = address,
-                OrderDate = DateTime.Now,
-                TotalAmount = cartItems.Sum(s => s.Price * s.Quantity),
-                Status = "Chờ duyệt"
-            };
-
+            var order = new Order { CustomerName = customerName, PhoneNumber = phone, Address = address, OrderDate = DateTime.Now, TotalAmount = cartItems.Sum(s => s.Price * s.Quantity), Status = "Chờ duyệt" };
             _context.Orders.Add(order);
-            await _context.SaveChangesAsync(); // Lưu để lấy được OrderId tự tăng
-
-            // 4. Lưu chi tiết từng món ăn vào bảng OrderDetails
+            await _context.SaveChangesAsync();
             foreach (var item in cartItems)
             {
-                var orderDetail = new OrderDetail
-                {
-                    OrderId = order.Id,
-                    MonAnId = item.ProductId, // Phải khớp với ID món ăn trong DB
-                    Quantity = item.Quantity,
-                    UnitPrice = item.Price
-                };
-                _context.OrderDetails.Add(orderDetail);
+                _context.OrderDetails.Add(new OrderDetail { OrderId = order.Id, MonAnId = item.ProductId, Quantity = item.Quantity, UnitPrice = item.Price });
             }
-
             await _context.SaveChangesAsync();
-
-            // 5. Trình diễn trang thông báo thành công
             return View("OrderSuccess");
         }
 
         private List<CartItem> GetCartItems()
         {
             var sessionCart = HttpContext.Session.GetString("Cart");
-            if (sessionCart != null) return JsonConvert.DeserializeObject<List<CartItem>>(sessionCart);
-            return new List<CartItem>();
+            return sessionCart != null ? JsonConvert.DeserializeObject<List<CartItem>>(sessionCart) : new List<CartItem>();
+        }
+
+        // --- CÁC TRANG KHÁC ---
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+            var monAn = await _context.MonAns.Include(m => m.Category).FirstOrDefaultAsync(m => m.Id == id);
+            return monAn == null ? NotFound() : View(monAn);
         }
 
         public IActionResult GioiThieu() => View();
@@ -176,9 +187,6 @@ namespace WebsiteBanDoAnVat.Controllers
         public IActionResult LienHe() => View();
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+        public IActionResult Error() => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

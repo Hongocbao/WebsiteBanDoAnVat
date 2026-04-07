@@ -67,12 +67,20 @@
                             <div class="card-body text-center">
                                 <h6 class="fw-bold mb-2">@item.Name</h6>
                                 <p class="text-danger fw-bold mb-3">@item.Price.ToString("N0")đ</p>
-                                <div class="d-grid gap-2">
+
+                                <div class="d-grid gap-2 product-action-@item.Id">
                                     <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-dark rounded-pill">Chi tiết</a>
-                                    <form asp-action="AddToCart" method="post">
-                                        <input type="hidden" name="productId" value="@item.Id" />
-                                        <button type="submit" class="btn btn-sm btn-danger rounded-pill w-100">Thêm vào giỏ</button>
-                                    </form>
+
+                                    <button class="btn btn-sm btn-danger rounded-pill w-100 add-to-cart-btn"
+                                            data-id="@item.Id" data-name="@item.Name" data-price="@item.Price" data-image="@item.ImageUrl">
+                                        Thêm vào giỏ
+                                    </button>
+
+                                    <div class="quantity-control d-none justify-content-between align-items-center border border-danger rounded-pill px-2 py-1 w-100 bg-white">
+                                        <button class="btn btn-sm text-danger fw-bold decrease-btn p-0" data-id="@item.Id" style="width: 25px;">-</button>
+                                        <span class="fw-bold text-danger item-qty-@item.Id">1</span>
+                                        <button class="btn btn-sm text-danger fw-bold increase-btn p-0" data-id="@item.Id" style="width: 25px;">+</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

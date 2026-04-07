@@ -1,0 +1,21 @@
+﻿@model WebsiteBanDoAnVat.Models.Category
+@{
+    ViewData["Title"] = "Sửa danh mục";
+}
+
+<div class="container mt-4">
+    <h2 class="text-warning">CHỈNH SỬA DANH MỤC</h2>
+    <form asp-action="CategoryEdit" method="post">
+        <input type="hidden" asp-for="Id" />
+        <div class="mb-3">
+            <label class="form-label">Tên danh mục</label>
+            <input asp-for="Name" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Mô tả</label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Cập nhật</button>
+        <a asp-action="Category" class="btn btn-secondary">Hủy</a>
+    </form>
+</div>

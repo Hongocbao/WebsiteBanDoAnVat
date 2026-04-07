@@ -103,15 +103,20 @@
                             </a>
                             <p class="text-danger fs-5 fw-bold mb-3">@item.Price.ToString("N0")đ</p>
 
-                            <div class="d-flex gap-2">
+                            <div class="d-flex gap-2 product-action-@item.Id">
                                 <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary btn-action w-50" style="font-size: 0.8rem;">
                                     <i class="fas fa-info-circle me-1"></i>Chi tiết
                                 </a>
                                 <button class="btn btn-sm btn-danger btn-action w-50 add-to-cart-btn"
                                         style="font-size: 0.8rem;"
-                                        data-id="@item.Id" data-name="@item.Name" data-price="@item.Price" data-img="@item.ImageUrl">
+                                        data-id="@item.Id" data-name="@item.Name" data-price="@item.Price" data-image="@item.ImageUrl">
                                     <i class="fas fa-cart-plus me-1"></i>Thêm
                                 </button>
+                                <div class="quantity-control d-none w-50 justify-content-between align-items-center border border-danger rounded-pill px-1 py-1 bg-white">
+                                    <button class="btn btn-sm text-danger fw-bold decrease-btn p-0" data-id="@item.Id" style="width: 20px;">-</button>
+                                    <span class="fw-bold text-danger item-qty-@item.Id" style="font-size: 0.8rem;">1</span>
+                                    <button class="btn btn-sm text-danger fw-bold increase-btn p-0" data-id="@item.Id" style="width: 20px;">+</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -155,10 +160,18 @@
                                     <h6 class="fw-bold text-truncate mb-1">@item.Name</h6>
                                 </a>
                                 <p class="text-success fw-bold mb-2">@item.Price.ToString("N0")đ</p>
-                                <button class="btn btn-sm btn-outline-success w-100 rounded-pill add-to-cart-btn"
-                                        data-id="@item.Id" data-name="@item.Name" data-price="@item.Price" data-img="@item.ImageUrl">
-                                    <i class="fas fa-plus me-1"></i>Giỏ hàng
-                                </button>
+
+                                <div class="product-action-@item.Id">
+                                    <button class="btn btn-sm btn-outline-success w-100 rounded-pill add-to-cart-btn fw-bold"
+                                            data-id="@item.Id" data-name="@item.Name" data-price="@item.Price" data-image="@item.ImageUrl">
+                                        <i class="fas fa-plus me-1"></i>Giỏ hàng
+                                    </button>
+                                    <div class="quantity-control d-none justify-content-between align-items-center border border-success rounded-pill px-2 py-1 w-100 bg-white">
+                                        <button class="btn btn-sm text-success fw-bold decrease-btn p-0" data-id="@item.Id" style="width: 25px;">-</button>
+                                        <span class="fw-bold text-success item-qty-@item.Id">1</span>
+                                        <button class="btn btn-sm text-success fw-bold increase-btn p-0" data-id="@item.Id" style="width: 25px;">+</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -167,27 +180,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            $(".add-to-cart-btn").click(function () {
-                const product = {
-                    id: $(this).data("id"),
-                    name: $(this).data("name"),
-                    price: parseFloat($(this).data("price")),
-                    image: $(this).data("img"),
-                    quantity: 1
-                };
-
-                let cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
-                const item = cart.find(i => i.id === product.id);
-                if (item) item.quantity++; else cart.push(product);
-
-                localStorage.setItem('anvat_cart', JSON.stringify(cart));
-                alert(`Đã thêm "${product.name}" vào giỏ hàng!`);
-                if (typeof updateCartUI === "function") updateCartUI();
-            });
-        });
-    </script>
-}
