@@ -29,5 +29,7 @@ namespace WebsiteBanDoAnVat.Models
         public int CategoryId { get; set; }
         [ForeignKey("CategoryId")]
         public Category? Category { get; set; }
+
+        public virtual ICollection<DanhGia> DanhGias { get; set; } = new List<DanhGia>();
     }
 }
