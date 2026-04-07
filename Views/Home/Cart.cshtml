@@ -2,6 +2,8 @@
     ViewData["Title"] = "Giỏ Hàng Của Bạn";
 }
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 <style>
     /* Tuỳ chỉnh riêng cho trang Giỏ hàng */
     .cart-card {
@@ -43,6 +45,22 @@
         color: #ff4757;
         font-weight: bold;
     }
+
+    /* Loading overlay cho map khi đang dịch tọa độ */
+    #map-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255,255,255,0.7);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        font-weight: bold;
+        color: #ff4757;
+    }
 </style>
 
 <div class="container my-4">
@@ -69,9 +87,7 @@
                     <div class="col-2 text-center">Số lượng</div>
                     <div class="col-3 text-center">Thành tiền</div>
                 </div>
-
-                <div id="cart-page-items">
-                </div>
+                <div id="cart-page-items"></div>
             </div>
         </div>
 
@@ -82,7 +98,7 @@
                     <a href="#" class="text-decoration-none small fw-bold" style="color: #ff4757;" data-bs-toggle="modal" data-bs-target="#addressModal">Thêm địa chỉ</a>
                 </div>
                 <div class="bg-light p-3 rounded-3 text-center border">
-                    <span class="fw-bold text-muted" style="font-size: 0.9rem;">Vui lòng thêm địa chỉ</span>
+                    <span id="displayAddress" class="fw-bold text-muted" style="font-size: 0.9rem;">Vui lòng thêm địa chỉ</span>
                 </div>
             </div>
 
@@ -90,10 +106,13 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold mb-0 text-dark">Khuyến mãi</h6>
                 </div>
-                <div class="input-group">
-                    <input type="text" class="form-control promo-input bg-light" placeholder="Nhập mã khuyến mãi">
-                    <button class="btn promo-btn">Áp dụng</button>
+                <div class="input-group mb-2">
+                    <input type="text" id="promoCodeInput" class="form-control promo-input bg-light" placeholder="Nhập mã khuyến mãi">
+                    <button id="applyPromoBtn" class="btn promo-btn">Áp dụng</button>
                 </div>
+                <small id="promoError" class="text-danger fw-bold d-none"></small>
+
+                <div id="appliedPromosContainer" class="d-flex flex-wrap gap-2 mt-2"></div>
             </div>
 
             <div class="cart-card p-4">
@@ -103,11 +122,11 @@
                 </div>
                 <div class="d-flex justify-content-between mb-2" style="font-size: 0.95rem;">
                     <span class="text-muted">Phí vận chuyển</span>
-                    <span class="fw-bold text-dark">0 đ</span>
+                    <span id="shipping-fee-display" class="fw-bold text-dark">0 đ</span>
                 </div>
                 <div class="d-flex justify-content-between mb-3" style="font-size: 0.95rem;">
                     <span class="text-muted">Giảm giá</span>
-                    <span class="fw-bold text-primary">0 đ</span>
+                    <span id="discount-display" class="fw-bold text-primary">0 đ</span>
                 </div>
                 <hr class="text-muted">
                 <div class="d-flex justify-content-between align-items-center mb-1">
@@ -121,47 +140,257 @@
         </div>
     </div>
 </div>
+
 <div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4">
             <div class="modal-header border-0 pb-0 mt-2">
-                <h5 class="modal-title w-100 text-center fw-bold" id="addressModalLabel" style="color: #ff4757;">Thêm địa chỉ</h5>
+                <h5 class="modal-title w-100 text-center fw-bold" id="addressModalLabel" style="color: #ff4757;">Thêm địa chỉ giao hàng</h5>
                 <button type="button" class="btn-close position-absolute end-0 me-3" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
             <div class="modal-body p-4">
                 <form id="addressForm">
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill w-100 fw-bold" onclick="getCurrentLocation()">
+                            <i class="fas fa-location-arrow me-2"></i>Sử dụng vị trí hiện tại của tôi
+                        </button>
+                    </div>
+
+                    <div class="position-relative rounded-3 mb-3 border shadow-sm" style="height: 250px; width: 100%; overflow: hidden;">
+                        <div id="map" style="height: 100%; width: 100%;"></div>
+                        <div id="map-overlay">Đang tải địa chỉ...</div>
+                    </div>
+
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <input type="text" class="form-control rounded-3" placeholder="Tên người nhận" required>
+                            <input type="text" id="recipientName" class="form-control rounded-3" placeholder="Tên người nhận" required>
                         </div>
                         <div class="col-md-6">
-                            <input type="tel" class="form-control rounded-3" placeholder="Số điện thoại" required>
+                            <input type="tel" id="recipientPhone" class="form-control rounded-3" placeholder="Số điện thoại" required>
                         </div>
                     </div>
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <input type="text" class="form-control rounded-3" placeholder="Tỉnh / Thành phố" required>
+                            <input type="text" id="province" class="form-control rounded-3" placeholder="Tỉnh / Thành phố" required>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" class="form-control rounded-3" placeholder="Phường / Xã" required>
+                            <input type="text" id="district" class="form-control rounded-3" placeholder="Quận / Huyện / Phường / Xã" required>
                         </div>
                     </div>
                     <div class="mb-4">
-                        <input type="text" class="form-control rounded-3" placeholder="Địa chỉ cụ thể" required>
+                        <input type="text" id="specificAddress" class="form-control rounded-3" placeholder="Địa chỉ cụ thể (Số nhà, tên đường...)" required>
                     </div>
 
-                    <button type="button" class="btn btn-danger w-100 rounded-pill fw-bold py-2 shadow-sm fs-6" data-bs-dismiss="modal">Xác nhận</button>
+                    <button type="button" class="btn btn-danger w-100 rounded-pill fw-bold py-2 shadow-sm fs-6" onclick="confirmAddress()">Xác nhận địa chỉ</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-@section Scripts {
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            renderCartPage();
 
-            // Hàm vẽ giao diện trang Giỏ hàng
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        let shippingFee = 0;
+        let map, marker;
+        const defaultLocation = [10.8550, 106.7850];
+
+        // === 1. LOGIC XỬ LÝ BẢN ĐỒ VÀ DỊCH TỌA ĐỘ SANG CHỮ ===
+        document.getElementById('addressModal').addEventListener('shown.bs.modal', function () {
+            if (!map) {
+                map = L.map('map').setView(defaultLocation, 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+                marker = L.marker(defaultLocation, {draggable: true}).addTo(map);
+
+                marker.on('dragend', function (e) {
+                    const pos = marker.getLatLng();
+                    reverseGeocode(pos.lat, pos.lng);
+                });
+
+                map.on('click', function(e) {
+                    marker.setLatLng(e.latlng);
+                    reverseGeocode(e.latlng.lat, e.latlng.lng);
+                });
+            } else {
+                map.invalidateSize();
+            }
+        });
+
+        window.getCurrentLocation = function() {
+            if (navigator.geolocation) {
+                document.getElementById('map-overlay').style.display = 'flex';
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    map.setView([lat, lng], 17);
+                    marker.setLatLng([lat, lng]);
+                    reverseGeocode(lat, lng);
+                }, function() {
+                    document.getElementById('map-overlay').style.display = 'none';
+                    alert("Không thể lấy vị trí. Vui lòng kiểm tra quyền truy cập GPS hoặc nhập bằng tay!");
+                });
+            } else {
+                alert("Trình duyệt không hỗ trợ GPS.");
+            }
+        }
+
+        // === 1. LOGIC DỊCH TỌA ĐỘ SANG CHỮ (CHUẨN VN 100%) ===
+        async function reverseGeocode(lat, lng) {
+            document.getElementById('map-overlay').style.display = 'flex';
+            try {
+                // accept-language=vi để ưu tiên trả về Tiếng Việt
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=vi`);
+                const data = await response.json();
+
+                if(data && data.display_name) {
+                    // Cắt chuỗi địa chỉ thành mảng theo dấu phẩy.
+                    // Ví dụ: ["Bến Thành", "Quận 1", "Thành phố Hồ Chí Minh", "700000", "Việt Nam"]
+                    let parts = data.display_name.split(',').map(p => p.trim());
+
+                    // Lọc bỏ chữ "Việt Nam" và các Mã bưu điện (các chuỗi chỉ chứa toàn số)
+                    parts = parts.filter(p => p !== 'Việt Nam' && p !== 'Vietnam' && !/^\d+$/.test(p));
+
+                    if (parts.length >= 2) {
+                        // Lấy từ dưới lên cho chuẩn
+                        const province = parts[parts.length - 1]; // Phần tử cuối: Tỉnh/Thành phố
+                        const district = parts[parts.length - 2]; // Phần tử áp chót: Quận/Huyện
+
+                        // Khúc đầu gom lại làm số nhà, tên đường, phường...
+                        const specific = parts.slice(0, parts.length - 2).join(', ');
+
+                        document.getElementById('province').value = province;
+                        document.getElementById('district').value = district;
+                        document.getElementById('specificAddress').value = specific;
+                    } else {
+                        // Lỡ rớt ghim vào chỗ vắng vẻ ít dữ liệu
+                        document.getElementById('province').value = '';
+                        document.getElementById('district').value = '';
+                        document.getElementById('specificAddress').value = data.display_name;
+                    }
+                }
+            } catch (error) {
+                console.error("Lỗi lấy địa chỉ", error);
+            } finally {
+                document.getElementById('map-overlay').style.display = 'none';
+            }
+        }
+
+        // === 2. HÀM TÍNH PHÍ SHIP CỐ ĐỊNH (BAO LỖI HÀNH CHÍNH) ===
+        function calculateFixedShippingFee() {
+            const provinceEl = document.getElementById('province');
+            const districtEl = document.getElementById('district'); // Lấy thêm ô Quận/Huyện
+
+            if (!provinceEl || !provinceEl.value) return;
+
+            // Gộp chuỗi Tỉnh + Quận lại rồi viết thường để quét 1 lần cho sạch lưới
+            const fullAddressToScan = (provinceEl.value + " " + (districtEl ? districtEl.value : "")).toLowerCase();
+
+            const cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
+            const totalOrder = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            if (totalOrder >= 500000) {
+                shippingFee = 0;
+            }
+            // Quét các từ khoá thuộc khu vực HCM & Thủ Đức
+            else if (fullAddressToScan.includes("hồ chí minh") ||
+                     fullAddressToScan.includes("hcm") ||
+                     fullAddressToScan.includes("sài gòn") ||
+                     fullAddressToScan.includes("thủ đức")) {
+                shippingFee = 20000;
+            }
+            else {
+                shippingFee = 45000;
+            }
+        }
+
+        // === 3. KHI BẤM NÚT XÁC NHẬN ĐỊA CHỈ ===
+        window.confirmAddress = function() {
+            const province = document.getElementById('province').value;
+            const district = document.getElementById('district').value;
+            const specificAddress = document.getElementById('specificAddress').value;
+
+            if(!province || !district || !specificAddress) {
+                alert("Vui lòng nhập hoặc chọn đầy đủ thông tin địa chỉ trên bản đồ!");
+                return;
+            }
+
+            calculateFixedShippingFee();
+
+            const fullAddress = `${specificAddress}, ${district}, ${province}`;
+            document.getElementById('displayAddress').innerText = fullAddress;
+
+            bootstrap.Modal.getInstance(document.getElementById('addressModal')).hide();
+            document.dispatchEvent(new Event('cartUpdated'));
+        }
+
+        // === 4. LOGIC XỬ LÝ KHUYẾN MÃI VÀ GIỎ HÀNG ===
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const promoDatabase = {
+                'FREESHIP': { type: 'freeship', value: 0 },
+                'GIAM10':   { type: 'discount', value: 10, max: 50000, isPercent: true },
+                'HUTECH20': { type: 'discount', value: 20, max: 100000, isPercent: true },
+                'TRU20K':   { type: 'discount', value: 20000, isPercent: false },
+                'FOODIE50': { type: 'discount', value: 50000, isPercent: false }
+            };
+
+            let appliedPromos = [];
+
+            // ÁP DỤNG MÃ
+            document.getElementById('applyPromoBtn').addEventListener('click', function() {
+                const codeInput = document.getElementById('promoCodeInput');
+                const code = codeInput.value.trim().toUpperCase();
+                const errorEl = document.getElementById('promoError');
+
+                errorEl.classList.add('d-none');
+
+                if (!code) {
+                    errorEl.innerText = "Vui lòng nhập mã khuyến mãi!";
+                    errorEl.classList.remove('d-none');
+                    return;
+                }
+
+                if (!promoDatabase[code]) {
+                    errorEl.innerText = "Mã không hợp lệ hoặc đã hết hạn!";
+                    errorEl.classList.remove('d-none');
+                    return;
+                }
+
+                if (appliedPromos.includes(code)) {
+                    errorEl.innerText = "Mã này đã được áp dụng rồi!";
+                    errorEl.classList.remove('d-none');
+                    return;
+                }
+
+                // LUẬT: 1 Freeship + 1 Discount
+                const newPromoType = promoDatabase[code].type;
+                const hasSameType = appliedPromos.some(p => promoDatabase[p].type === newPromoType);
+
+                if (hasSameType) {
+                    errorEl.innerText = newPromoType === 'freeship'
+                        ? "Bạn chỉ được dùng 1 mã Miễn phí vận chuyển!"
+                        : "Bạn chỉ được dùng 1 mã Giảm giá đơn hàng!";
+                    errorEl.classList.remove('d-none');
+                    return;
+                }
+
+                appliedPromos.push(code);
+                codeInput.value = '';
+                renderCartPage();
+            });
+
+            // XÓA MÃ
+            window.removePromo = function(codeToRemove) {
+                appliedPromos = appliedPromos.filter(code => code !== codeToRemove);
+                renderCartPage();
+            };
+
+            renderCartPage();
+            document.addEventListener('cartUpdated', renderCartPage);
+
             function renderCartPage() {
                 const cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
                 const container = document.getElementById('cart-page-items');
@@ -169,22 +398,18 @@
                 const cartContent = document.getElementById('cart-content');
                 const totalItemsLabel = document.getElementById('total-items-label');
 
-                // Nếu giỏ hàng trống -> Ẩn chia cột, Hiện thông báo trống
                 if (cart.length === 0) {
                     cartContent.classList.add('d-none');
                     emptyMsg.classList.remove('d-none');
                     return;
                 }
 
-                // Có hàng -> Hiện chia cột
                 cartContent.classList.remove('d-none');
                 emptyMsg.classList.add('d-none');
 
-                // Cập nhật dòng "Tất cả x sản phẩm"
                 const totalQty = cart.reduce((sum, i) => sum + i.quantity, 0);
                 totalItemsLabel.innerText = `Tất cả ${cart.length} sản phẩm`;
 
-                // Render danh sách món
                 let totalMoney = 0;
                 container.innerHTML = cart.map((item, index) => {
                     const lineTotal = item.price * item.quantity;
@@ -195,17 +420,11 @@
                             <img src="${item.image}" class="rounded-3 border me-3" style="width: 80px; height: 80px; object-fit: cover;">
                             <div>
                                 <h6 class="fw-bold mb-2 text-dark" style="font-size: 0.95rem;">${item.name}</h6>
-                                <select class="form-select form-select-sm text-muted bg-light border-0 shadow-none" style="width: 100px; font-size: 0.8rem;">
-                                    <option>500gr</option>
-                                    <option>1kg</option>
-                                </select>
                             </div>
                         </div>
-
                         <div class="col-4 col-md-2 fw-bold text-dark text-md-center" style="font-size: 0.95rem;">
                             <span class="d-md-none text-muted fw-normal me-2">Giá:</span>${item.price.toLocaleString('vi-VN')} đ
                         </div>
-
                         <div class="col-4 col-md-2 d-flex justify-content-md-center">
                             <div class="d-flex align-items-center border rounded-pill px-1 py-1 bg-white shadow-sm">
                                 <button class="qty-btn decrease-btn" data-id="${item.id}">-</button>
@@ -213,7 +432,6 @@
                                 <button class="qty-btn increase-btn" data-id="${item.id}">+</button>
                             </div>
                         </div>
-
                         <div class="col-4 col-md-3 d-flex justify-content-between justify-content-md-end align-items-center">
                             <span class="fw-bold" style="color: #ff4757; font-size: 1.05rem;">
                                 ${lineTotal.toLocaleString('vi-VN')} đ
@@ -225,14 +443,70 @@
                     </div>`;
                 }).join('');
 
-                // Cập nhật phần Tính tiền bên phải
+                // 1. Tạm tính
                 document.getElementById('cart-subtotal').innerText = totalMoney.toLocaleString('vi-VN') + ' đ';
-                document.getElementById('cart-total').innerText = totalMoney.toLocaleString('vi-VN') + ' đ';
+
+                // Hiển thị UI Tags mã
+                const promoContainer = document.getElementById('appliedPromosContainer');
+                if(appliedPromos.length > 0) {
+                    promoContainer.innerHTML = appliedPromos.map(code => `
+                        <span class="badge bg-success d-flex align-items-center py-2 px-3 shadow-sm" style="font-size: 0.85rem;">
+                            <i class="fas fa-ticket-alt me-2"></i> ${code}
+                            <i class="fas fa-times ms-2" style="cursor: pointer;" onclick="removePromo('${code}')"></i>
+                        </span>
+                    `).join('');
+                } else {
+                    promoContainer.innerHTML = '';
+                }
+
+                // 2. Tính lại phí ship gốc
+                if (document.getElementById('province').value) {
+                    calculateFixedShippingFee();
+                }
+
+                // 3. XỬ LÝ RIÊNG BIỆT FREESHIP VÀ DISCOUNT
+                let totalDiscountOnOrder = 0;
+                let isFreeshipApplied = false;
+
+                appliedPromos.forEach(code => {
+                    const promo = promoDatabase[code];
+                    if (promo.type === 'freeship') {
+                        isFreeshipApplied = true;
+                    } else if (promo.type === 'discount') {
+                        if (promo.isPercent) {
+                            let d = totalMoney * (promo.value / 100);
+                            if (d > promo.max) d = promo.max;
+                            totalDiscountOnOrder = d;
+                        } else {
+                            totalDiscountOnOrder = promo.value;
+                        }
+                    }
+                });
+
+                // Đảm bảo giảm không lố tiền hàng
+                if (totalDiscountOnOrder > totalMoney) totalDiscountOnOrder = totalMoney;
+
+                // Giao diện hiển thị phí Ship (Gạch ngang nếu có Freeship)
+                let finalShippingFee = shippingFee;
+                let shippingHtml = shippingFee.toLocaleString('vi-VN') + ' đ';
+
+                if (isFreeshipApplied && shippingFee > 0) {
+                    finalShippingFee = 0;
+                    shippingHtml = `<span class="text-decoration-line-through text-muted me-2 fw-normal" style="font-size: 0.85em;">${shippingFee.toLocaleString('vi-VN')} đ</span><span class="text-success">0 đ</span>`;
+                }
+
+                document.getElementById('shipping-fee-display').innerHTML = shippingHtml;
+
+                // Giao diện Giảm giá giờ chỉ hiển thị % giảm giá hàng hóa (không chứa tiền ship nữa)
+                document.getElementById('discount-display').innerText = (totalDiscountOnOrder > 0 ? '- ' : '') + totalDiscountOnOrder.toLocaleString('vi-VN') + ' đ';
+
+                // 4. Tổng cộng
+                const finalTotal = totalMoney + finalShippingFee - totalDiscountOnOrder;
+                document.getElementById('cart-total').innerText = finalTotal.toLocaleString('vi-VN') + ' đ';
+
                 document.getElementById('checkout-btn-text').innerText = `Mua hàng (${totalQty})`;
             }
 
-            // Lắng nghe sự kiện click trên toàn body (Dùng chung bộ nút với Layout)
-            // Đặt setTimeout để đợi logic trong _Layout.cshtml cập nhật LocalStorage xong rồi mới vẽ lại trang này
             document.body.addEventListener('click', function(e) {
                 if (e.target.closest('.increase-btn') || e.target.closest('.decrease-btn') || e.target.closest('.remove-item-btn') || e.target.closest('.add-to-cart-btn')) {
                     setTimeout(renderCartPage, 50);

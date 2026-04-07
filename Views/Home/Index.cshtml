@@ -1,90 +1,122 @@
 ﻿@model WebsiteBanDoAnVat.Models.HomeViewModel
+
 @{
     ViewData["Title"] = "Trang Chủ";
 }
 
-<div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-dark text-white rounded-5"
-     style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=1200') center/cover;">
+@section Styles {
+    <style>
+        .product-card {
+            transition: all 0.3s ease;
+            border: 1px solid #eee !important;
+            border-radius: 20px !important;
+        }
+
+            .product-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+            }
+
+        .btn-action {
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .product-img-container {
+            position: relative;
+            overflow: hidden;
+            height: 180px;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .product-card:hover .product-img {
+            transform: scale(1.1);
+        }
+
+        .badge-hot {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 2;
+        }
+    </style>
+}
+
+@* 1. Hero Section (Banner) *@
+<div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-dark text-white rounded-5 shadow-lg"
+     style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/images/banner-snack.jpg') center/cover;">
     <div class="col-md-6 p-lg-5 mx-auto my-5">
-        <h1 class="display-3 fw-bold">Ăn vặt cực đã!</h1>
-        <h3 class="fw-normal mb-4 text-warning">Giao hàng siêu tốc - Giá rẻ bất ngờ</h3>
-        <a class="btn btn-warning btn-lg fw-bold px-5 rounded-pill shadow-lg" href="#">Mua Ngay</a>
+        <h1 class="display-3 fw-bold text-warning">Ăn vặt cực đã!</h1>
+        <h3 class="fw-normal mb-4">Giao hàng siêu tốc - Ăn là nghiện</h3>
+        <a class="btn btn-warning btn-lg fw-bold px-5 rounded-pill shadow" href="#shop-section">MUA NGAY</a>
     </div>
 </div>
 
-<div class="container my-5">
+@* 2. Service Icons *@
+<div class="container my-5 text-center">
     <div class="row g-4">
-        <div class="col-6 col-md-3">
-            <div class="bg-white p-3 rounded-4 shadow-sm border h-100 d-flex align-items-center justify-content-center">
-                <i class="fas fa-box-open fs-3 text-success me-3"></i>
-                <div>
-                    <h6 class="fw-bold mb-1">Hàng hoá</h6>
-                    <small class="text-muted" style="font-size: 0.75rem;">Luôn luôn tươi ngon</small>
+        @foreach (var s in new[] { ("fa-box", "Hàng hoá", "Tươi ngon"), ("fa-truck", "Giao hàng", "Siêu tốc"), ("fa-headset", "Tư vấn", "24/7"), ("fa-shield-heart", "An toàn", "Vệ sinh") })
+        {
+            <div class="col-6 col-md-3">
+                <div class="bg-white p-3 rounded-4 shadow-sm border h-100 d-flex align-items-center justify-content-center">
+                    <i class="fas @s.Item1 fs-3 text-success me-3"></i>
+                    <div class="text-start">
+                        <h6 class="fw-bold mb-0">@s.Item2</h6>
+                        <small class="text-muted">@s.Item3</small>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="bg-white p-3 rounded-4 shadow-sm border h-100 d-flex align-items-center justify-content-center">
-                <i class="fas fa-truck-fast fs-3 text-success me-3"></i>
-                <div>
-                    <h6 class="fw-bold mb-1">Giao hàng</h6>
-                    <small class="text-muted" style="font-size: 0.75rem;">Nhanh chóng, tiết kiệm</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="bg-white p-3 rounded-4 shadow-sm border h-100 d-flex align-items-center justify-content-center">
-                <i class="fas fa-headset fs-3 text-success me-3"></i>
-                <div>
-                    <h6 class="fw-bold mb-1">Tư vấn</h6>
-                    <small class="text-muted" style="font-size: 0.75rem;">Chu đáo, tận tâm</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="bg-white p-3 rounded-4 shadow-sm border h-100 d-flex align-items-center justify-content-center">
-                <i class="fas fa-shield-halved fs-3 text-success me-3"></i>
-                <div>
-                    <h6 class="fw-bold mb-1">Thực phẩm</h6>
-                    <small class="text-muted" style="font-size: 0.75rem;">Vệ sinh, an toàn</small>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 </div>
 
-<div class="container my-5 bg-success bg-opacity-10 p-4 p-md-5 rounded-4">
+@* 3. Sản phẩm bán chạy (Best Sellers) *@
+<div class="container my-5 bg-danger bg-opacity-10 p-4 p-md-5 rounded-5" id="shop-section">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="fw-bold text-success"><i class="fas fa-medal me-2"></i>Sản phẩm bán chạy</h3>
-        <a asp-controller="Home" asp-action="SanPham" class="btn btn-light text-success fw-bold rounded-pill px-4 shadow-sm">Xem Thêm</a>
+        <h3 class="fw-bold text-danger"><i class="fas fa-fire me-2"></i>SẢN PHẨM ĐANG HOT</h3>
+        <a asp-action="SanPham" class="btn btn-danger rounded-pill px-4">Xem tất cả</a>
     </div>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
-        @if (Model?.BestSellers != null)
+        @if (Model.BestSellers != null)
         {
             @foreach (var item in Model.BestSellers)
             {
                 <div class="col">
-                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden product-card bg-white">
-                        <div class="position-relative">
-                            <img src="@item.ImageUrl" class="card-img-top" style="height: 200px; object-fit: cover;" alt="@item.Name">
+                    <div class="card h-100 border-0 shadow-sm product-card bg-white">
+                        <div class="product-img-container">
+                            <span class="badge bg-danger badge-hot px-3 py-2 rounded-pill shadow-sm">HOT</span>
+                            <a asp-action="Details" asp-route-id="@item.Id">
+                                <img src="@item.ImageUrl" class="product-img" alt="@item.Name" onerror="this.src='/images/no-image.png'">
+                            </a>
                         </div>
-                        <div class="card-body">
-                            <h6 class="card-title fw-bold">@item.Name</h6>
-                            <p class="text-success fs-6 fw-bold mb-0">@item.Price.ToString("N0")đ</p>
-                        </div>
-                        <div class="card-footer bg-transparent border-0 pb-3 px-3 product-action-@item.Id">
-                            <button class="btn btn-outline-success w-100 rounded-pill fw-bold add-to-cart-btn"
-                                    data-id="@item.Id"
-                                    data-name="@item.Name"
-                                    data-price="@item.Price"
-                                    data-image="@item.ImageUrl">
-                                <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ
-                            </button>
-                            <div class="quantity-control d-none justify-content-between align-items-center border border-success rounded-pill px-2 py-1">
-                                <button class="btn btn-sm text-success fw-bold decrease-btn" data-id="@item.Id" style="width: 30px;"><i class="fas fa-minus"></i></button>
-                                <span class="fw-bold text-success item-qty-@item.Id">1</span>
-                                <button class="btn btn-sm text-success fw-bold increase-btn" data-id="@item.Id" style="width: 30px;"><i class="fas fa-plus"></i></button>
+                        <div class="card-body text-center">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none">
+                                <h6 class="card-title fw-bold text-dark">@item.Name</h6>
+                            </a>
+                            <p class="text-danger fs-5 fw-bold mb-3">@item.Price.ToString("N0")đ</p>
+
+                            <div class="d-flex gap-2 product-action-@item.Id">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary btn-action w-50" style="font-size: 0.8rem;">
+                                    <i class="fas fa-info-circle me-1"></i>Chi tiết
+                                </a>
+                                <button class="btn btn-sm btn-danger btn-action w-50 add-to-cart-btn"
+                                        style="font-size: 0.8rem;"
+                                        data-id="@item.Id" data-name="@item.Name" data-price="@item.Price" data-image="@item.ImageUrl">
+                                    <i class="fas fa-cart-plus me-1"></i>Thêm
+                                </button>
+                                <div class="quantity-control d-none w-50 justify-content-between align-items-center border border-danger rounded-pill px-1 py-1 bg-white">
+                                    <button class="btn btn-sm text-danger fw-bold decrease-btn p-0" data-id="@item.Id" style="width: 20px;">-</button>
+                                    <span class="fw-bold text-danger item-qty-@item.Id" style="font-size: 0.8rem;">1</span>
+                                    <button class="btn btn-sm text-danger fw-bold increase-btn p-0" data-id="@item.Id" style="width: 20px;">+</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -94,178 +126,57 @@
     </div>
 </div>
 
-<div class="container my-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="fw-bold"><i class="fas fa-box text-warning me-2"></i>Sản phẩm mới ra mắt</h3>
-        <a asp-controller="Home" asp-action="SanPham" class="btn btn-success fw-bold rounded-pill px-4 shadow-sm">Tất cả danh mục</a>
-    </div>
-
+@* 4. Danh mục và Sản phẩm mới *@
+<div class="container my-5 pb-5">
     <div class="row g-4">
         <div class="col-lg-3">
-            <div class="rounded-4 overflow-hidden h-100 d-flex align-items-center justify-content-center shadow-sm" style="background-color: #fce7a1; min-height: 250px;">
-                <div class="text-center">
-                    <h2 class="fw-bold text-success mb-0" style="font-size: 2.5rem;">MỚI</h2>
-                    <h3 class="fw-bold text-warning" style="font-size: 1.8rem; -webkit-text-stroke: 1px white;">CẬP NHẬT</h3>
+            <div class="bg-white p-4 rounded-4 shadow-sm border">
+                <h5 class="fw-bold text-success mb-4"><i class="fas fa-list me-2"></i>DANH MỤC</h5>
+                <div class="list-group list-group-flush">
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <a asp-action="SanPham" asp-route-categoryId="@cat.Id" class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-chevron-right me-2 text-muted small"></i>@cat.Name</span>
+                        </a>
+                    }
                 </div>
             </div>
         </div>
+
         <div class="col-lg-9">
+            <h4 class="fw-bold mb-4">GỢI Ý CHO BẠN</h4>
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-                @if (Model?.NewProducts != null)
+                @foreach (var item in Model.AllProducts.Take(9))
                 {
-                    @foreach (var item in Model.NewProducts)
-                    {
-                        <div class="col">
-                            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden product-card">
-                                <img src="@item.ImageUrl" class="card-img-top" style="height: 200px; object-fit: cover;" alt="@item.Name">
-                                <div class="card-body">
-                                    <h6 class="card-title fw-bold">@item.Name</h6>
-                                    <p class="text-warning fs-6 fw-bold mb-0">@item.Price.ToString("N0")đ</p>
-                                </div>
-                                <div class="card-footer bg-transparent border-0 pb-3 px-3 product-action-@item.Id">
-                                    <button class="btn btn-outline-warning w-100 rounded-pill fw-bold add-to-cart-btn"
-                                            data-id="@item.Id"
-                                            data-name="@item.Name"
-                                            data-price="@item.Price"
-                                            data-image="@item.ImageUrl">
-                                        <i class="fas fa-shopping-cart me-2"></i>Thêm
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm product-card">
+                            <div class="product-img-container" style="height: 150px;">
+                                <a asp-action="Details" asp-route-id="@item.Id">
+                                    <img src="@item.ImageUrl" class="product-img" alt="@item.Name">
+                                </a>
+                            </div>
+                            <div class="card-body p-3">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none text-dark">
+                                    <h6 class="fw-bold text-truncate mb-1">@item.Name</h6>
+                                </a>
+                                <p class="text-success fw-bold mb-2">@item.Price.ToString("N0")đ</p>
+
+                                <div class="product-action-@item.Id">
+                                    <button class="btn btn-sm btn-outline-success w-100 rounded-pill add-to-cart-btn fw-bold"
+                                            data-id="@item.Id" data-name="@item.Name" data-price="@item.Price" data-image="@item.ImageUrl">
+                                        <i class="fas fa-plus me-1"></i>Giỏ hàng
                                     </button>
-                                    <div class="quantity-control d-none justify-content-between align-items-center border border-warning rounded-pill px-2 py-1">
-                                        <button class="btn btn-sm text-warning fw-bold decrease-btn" data-id="@item.Id" style="width: 30px;"><i class="fas fa-minus"></i></button>
-                                        <span class="fw-bold text-warning item-qty-@item.Id">1</span>
-                                        <button class="btn btn-sm text-warning fw-bold increase-btn" data-id="@item.Id" style="width: 30px;"><i class="fas fa-plus"></i></button>
+                                    <div class="quantity-control d-none justify-content-between align-items-center border border-success rounded-pill px-2 py-1 w-100 bg-white">
+                                        <button class="btn btn-sm text-success fw-bold decrease-btn p-0" data-id="@item.Id" style="width: 25px;">-</button>
+                                        <span class="fw-bold text-success item-qty-@item.Id">1</span>
+                                        <button class="btn btn-sm text-success fw-bold increase-btn p-0" data-id="@item.Id" style="width: 25px;">+</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    }
+                    </div>
                 }
             </div>
-        </div>
-    </div>
-</div>
-
-<div class="container my-5 pb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="fw-bold"><i class="fas fa-th-large text-danger me-2"></i>Danh mục sản phẩm</h3>
-        <a asp-controller="Home" asp-action="SanPham" class="btn btn-success fw-bold rounded-pill px-4 shadow-sm">Xem thêm</a>
-    </div>
-
-    <div class="row g-4">
-        <div class="col-lg-3">
-            <div class="p-3 rounded-4" style="background-color: #fdf5d3;">
-                <ul class="nav flex-column gap-2">
-                    <li class="nav-item"><a href="#" class="nav-link text-dark fw-bold rounded-3" style="background-color: #fce7a1;">Tất cả</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link text-dark">Bánh tráng</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link text-dark">Bò</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link text-dark">Mực</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link text-dark">Cá</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link text-dark">Heo</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link text-dark">Gà</a></li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="col-lg-9">
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
-                <div class="col">
-                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden product-card">
-                        <img src="https://images.unsplash.com/photo-1621236322951-f073527a4411?w=400" class="card-img-top" style="height: 180px; object-fit: cover;">
-                        <div class="card-body p-3">
-                            <h6 class="card-title fw-bold" style="font-size: 0.9rem;">Khô Cá Thiều Muối Ớt</h6>
-                            <p class="text-warning fs-6 fw-bold mb-0">200.000đ</p>
-                        </div>
-                        <div class="card-footer bg-transparent border-0 pb-3 px-3 d-flex justify-content-end product-action-8">
-                            <button class="btn btn-success rounded-circle add-to-cart-btn" style="width: 40px; height: 40px; padding: 0;"
-                                    data-id="8" data-name="Khô Cá Thiều Muối Ớt" data-price="200000" data-image="https://images.unsplash.com/photo-1621236322951-f073527a4411?w=400">
-                                <i class="fas fa-shopping-bag"></i>
-                            </button>
-                            <div class="quantity-control d-none justify-content-between align-items-center border border-success rounded-pill px-2 py-1 w-100">
-                                <button class="btn btn-sm text-success fw-bold decrease-btn" data-id="8" style="width: 25px;">-</button>
-                                <span class="fw-bold text-success item-qty-8">1</span>
-                                <button class="btn btn-sm text-success fw-bold increase-btn" data-id="8" style="width: 25px;">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col">
-                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden product-card">
-                        <img src="https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400" class="card-img-top" style="height: 180px; object-fit: cover;">
-                        <div class="card-body p-3">
-                            <h6 class="card-title fw-bold" style="font-size: 0.9rem;">Bánh Tráng Tôm Sấy Giòn</h6>
-                            <p class="text-warning fs-6 fw-bold mb-0">130.000đ</p>
-                        </div>
-                        <div class="card-footer bg-transparent border-0 pb-3 px-3 d-flex justify-content-end product-action-9">
-                            <button class="btn btn-success rounded-circle add-to-cart-btn" style="width: 40px; height: 40px; padding: 0;"
-                                    data-id="9" data-name="Bánh Tráng Tôm Sấy Giòn" data-price="130000" data-image="https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400">
-                                <i class="fas fa-shopping-bag"></i>
-                            </button>
-                            <div class="quantity-control d-none justify-content-between align-items-center border border-success rounded-pill px-2 py-1 w-100">
-                                <button class="btn btn-sm text-success fw-bold decrease-btn" data-id="9" style="width: 25px;">-</button>
-                                <span class="fw-bold text-success item-qty-9">1</span>
-                                <button class="btn btn-sm text-success fw-bold increase-btn" data-id="9" style="width: 25px;">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col">
-                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden product-card">
-                        <img src="https://images.unsplash.com/photo-1621236322951-f073527a4411?w=400" class="card-img-top" style="height: 180px; object-fit: cover;">
-                        <div class="card-body p-3">
-                            <h6 class="card-title fw-bold" style="font-size: 0.9rem;">Kẹo đậu phộng xốp bơ</h6>
-                            <p class="text-warning fs-6 fw-bold mb-0">125.000đ</p>
-                        </div>
-                        <div class="card-footer bg-transparent border-0 pb-3 px-3 d-flex justify-content-end product-action-10">
-                            <button class="btn btn-success rounded-circle add-to-cart-btn" style="width: 40px; height: 40px; padding: 0;"
-                                    data-id="10" data-name="Kẹo đậu phộng xốp bơ" data-price="125000" data-image="https://images.unsplash.com/photo-1621236322951-f073527a4411?w=400">
-                                <i class="fas fa-shopping-bag"></i>
-                            </button>
-                            <div class="quantity-control d-none justify-content-between align-items-center border border-success rounded-pill px-2 py-1 w-100">
-                                <button class="btn btn-sm text-success fw-bold decrease-btn" data-id="10" style="width: 25px;">-</button>
-                                <span class="fw-bold text-success item-qty-10">1</span>
-                                <button class="btn btn-sm text-success fw-bold increase-btn" data-id="10" style="width: 25px;">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col">
-                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden product-card">
-                        <img src="https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400" class="card-img-top" style="height: 180px; object-fit: cover;">
-                        <div class="card-body p-3">
-                            <h6 class="card-title fw-bold" style="font-size: 0.9rem;">Combo bánh tráng tóp tép</h6>
-                            <p class="text-warning fs-6 fw-bold mb-0">140.000đ</p>
-                        </div>
-                        <div class="card-footer bg-transparent border-0 pb-3 px-3 d-flex justify-content-end product-action-11">
-                            <button class="btn btn-success rounded-circle add-to-cart-btn" style="width: 40px; height: 40px; padding: 0;"
-                                    data-id="11" data-name="Combo bánh tráng tóp tép" data-price="140000" data-image="https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400">
-                                <i class="fas fa-shopping-bag"></i>
-                            </button>
-                            <div class="quantity-control d-none justify-content-between align-items-center border border-success rounded-pill px-2 py-1 w-100">
-                                <button class="btn btn-sm text-success fw-bold decrease-btn" data-id="11" style="width: 25px;">-</button>
-                                <span class="fw-bold text-success item-qty-11">1</span>
-                                <button class="btn btn-sm text-success fw-bold increase-btn" data-id="11" style="width: 25px;">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-            <nav aria-label="Page navigation" class="mt-5">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item disabled"><a class="page-link rounded-circle me-2" href="#" tabindex="-1" aria-disabled="true"><i class="fas fa-chevron-left"></i></a></li>
-                    <li class="page-item active"><a class="page-link rounded-circle me-2 bg-success border-success text-white" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link rounded-circle me-2 text-dark" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link rounded-circle me-2 text-dark" href="#">3</a></li>
-                    <li class="page-item"><span class="page-link rounded-circle me-2 border-0 text-dark">...</span></li>
-                    <li class="page-item"><a class="page-link rounded-circle me-2 text-dark" href="#">28</a></li>
-                    <li class="page-item"><a class="page-link rounded-circle text-dark" href="#"><i class="fas fa-chevron-right"></i></a></li>
-                </ul>
-            </nav>
         </div>
     </div>
 </div>

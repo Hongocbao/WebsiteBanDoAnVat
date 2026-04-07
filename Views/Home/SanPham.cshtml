@@ -1,13 +1,92 @@
-﻿<!DOCTYPE html>
+﻿@model IEnumerable<WebsiteBanDoAnVat.Models.MonAn>
 
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>@ViewBag.Title</title>
-</head>
-<body>
-    <div>
-        
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-3 mb-4">
+            <div class="card border-0 shadow-sm p-3" style="border-radius: 20px; position: sticky; top: 20px;">
+                <h5 class="fw-bold mb-3" style="color: #ff4d4d;"><i class="fas fa-utensils me-2"></i>Danh Mục</h5>
+                <div class="list-group list-group-flush category-menu">
+                    <a asp-action="SanPham" class="list-group-item list-group-item-action border-0 px-0 py-2">
+                        <i class="fas fa-chevron-right me-2 small"></i> Tất cả món ăn
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action border-0 px-0 py-2">
+                        <i class="fas fa-chevron-right me-2 small"></i> Đồ ăn vặt khô
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action border-0 px-0 py-2">
+                        <i class="fas fa-chevron-right me-2 small"></i> Trà sữa & Đồ uống
+                    </a>
+                </div>
+
+                <hr>
+                <h5 class="fw-bold mb-3" style="color: #ff4d4d;"><i class="fas fa-filter me-2"></i>Lọc theo giá</h5>
+                <form asp-action="SanPham" method="get" class="d-flex flex-column gap-2">
+                    <input type="hidden" name="filter" value="@Context.Request.Query["filter"]" />
+
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">Từ</span>
+                        <input type="number" name="minPrice" class="form-control" placeholder="0" value="@Context.Request.Query["minPrice"]">
+                    </div>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">Đến</span>
+                        <input type="number" name="maxPrice" class="form-control" placeholder="VND" value="@Context.Request.Query["maxPrice"]">
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-danger rounded-pill mt-1">Áp dụng lọc</button>
+                    <a asp-action="SanPham" class="btn btn-sm btn-link text-muted" style="text-decoration:none">Xóa lọc</a>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="d-flex flex-wrap gap-2 mb-4 justify-content-center">
+                <a asp-action="SanPham" asp-route-filter="" class="btn btn-outline-secondary rounded-pill px-4">Tất cả</a>
+                <a asp-action="SanPham" asp-route-filter="banchay" class="btn btn-outline-danger rounded-pill px-4">🔥 Bán chạy</a>
+                <a asp-action="SanPham" asp-route-filter="moinhat" class="btn btn-outline-primary rounded-pill px-4">✨ Mới nhất</a>
+                <a asp-action="SanPham" asp-route-filter="hot" class="btn btn-outline-warning rounded-pill px-4">🌟 Đang HOT</a>
+                <a asp-action="SanPham" asp-route-filter="giamgia" class="btn btn-outline-success rounded-pill px-4">💸 Giảm giá</a>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-uppercase fw-bold fs-4" style="color: #ff4d4d; border-left: 5px solid #ff4d4d; padding-left: 15px;">
+                    Thực Đơn Ăn Vặt
+                </h2>
+                <span class="badge bg-danger rounded-pill">@Model.Count() món</span>
+            </div>
+
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+                @foreach (var item in Model)
+                {
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm product-card" style="border-radius: 15px; overflow: hidden; transition: 0.3s;">
+                            <div class="position-relative">
+                                <img src="@item.ImageUrl" class="card-img-top" alt="@item.Name" style="height: 200px; object-fit: cover;">
+                                @if (item.IsBestSeller)
+                                {
+                                    <span class="position-absolute top-0 start-0 m-2 badge bg-danger">Bán chạy</span>
+                                }
+                            </div>
+                            <div class="card-body text-center">
+                                <h6 class="fw-bold mb-2">@item.Name</h6>
+                                <p class="text-danger fw-bold mb-3">@item.Price.ToString("N0")đ</p>
+
+                                <div class="d-grid gap-2 product-action-@item.Id">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-dark rounded-pill">Chi tiết</a>
+
+                                    <button class="btn btn-sm btn-danger rounded-pill w-100 add-to-cart-btn"
+                                            data-id="@item.Id" data-name="@item.Name" data-price="@item.Price" data-image="@item.ImageUrl">
+                                        Thêm vào giỏ
+                                    </button>
+
+                                    <div class="quantity-control d-none justify-content-between align-items-center border border-danger rounded-pill px-2 py-1 w-100 bg-white">
+                                        <button class="btn btn-sm text-danger fw-bold decrease-btn p-0" data-id="@item.Id" style="width: 25px;">-</button>
+                                        <span class="fw-bold text-danger item-qty-@item.Id">1</span>
+                                        <button class="btn btn-sm text-danger fw-bold increase-btn p-0" data-id="@item.Id" style="width: 25px;">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
     </div>
-</body>
-</html>
+</div>
