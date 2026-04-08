@@ -24,13 +24,22 @@
             <hr>
             <p class="text-muted" style="line-height: 1.8;">@Model.Description</p>
 
-            <div class="mt-4">
-                <button type="button" class="btn text-white btn-lg px-5 rounded-pill fw-bold add-to-cart-btn shadow-sm"
+            <div class="mt-4 d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center border rounded-pill p-1 bg-light shadow-sm" style="width: 140px; height: 55px;">
+                    <button type="button" class="btn btn-link text-dark fw-bold text-decoration-none px-3" onclick="changeDetailQty(-1)">-</button>
+                    <input type="text" id="detailQty" class="form-control border-0 bg-transparent text-center fw-bold p-0"
+                           value="1" readonly
+                           style="box-shadow: none; width: 40px; font-size: 1.2rem;">
+                    <button type="button" class="btn btn-link text-dark fw-bold text-decoration-none px-3" onclick="changeDetailQty(1)">+</button>
+                </div>
+
+                <button type="button" class="btn text-white btn-lg px-5 rounded-pill fw-bold shadow-sm"
+                        onclick="addToCartFromDetail(this)"
                         data-id="@Model.Id"
                         data-name="@Model.Name"
                         data-price="@Model.Price"
                         data-image="@Model.ImageUrl"
-                        style="background-color: #81B64C; min-width: 250px; height: 55px;">
+                        style="background-color: #81B64C; flex-grow: 1; height: 55px;">
                     THÊM VÀO GIỎ HÀNG <i class="fas fa-shopping-bag ms-2"></i>
                 </button>
             </div>
@@ -43,7 +52,7 @@
 
             <div class="mb-5 p-4 border rounded-3 bg-light shadow-sm">
                 <h6 class="fw-bold mb-3"><i class="fas fa-edit me-2"></i>Gửi nhận xét của bạn</h6>
-                @if (User.Identity.IsAuthenticated)
+                @if (User.Identity?.IsAuthenticated == true)
                 {
                     <form asp-action="PostComment" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="MonAnId" value="@Model.Id" />
@@ -117,43 +126,58 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
-            $('.add-to-cart-btn').on('click', function (e) {
-                e.preventDefault();
+        // 1. Hàm tăng giảm số lượng
+        function changeDetailQty(amount) {
+            const input = document.getElementById('detailQty');
+            let currentVal = parseInt(input.value) || 1;
+            currentVal += amount;
+            if (currentVal < 1) currentVal = 1;
+            input.value = currentVal;
+        }
 
-                // MẶC ĐỊNH MỖI LẦN BẤM LÀ 1
-                const product = {
-                    id: $(this).data('id').toString(),
-                    name: $(this).data('name'),
-                    price: parseFloat($(this).data('price')),
-                    image: $(this).data('image') || '/images/no-image.png',
-                    quantity: 1
-                };
+        // 2. Hàm thêm vào giỏ hàng (Gọi trực tiếp từ nút)
+        function addToCartFromDetail(btn) {
+            const qtyToAdd = parseInt(document.getElementById('detailQty').value) || 1;
 
-                // Logic LocalStorage
-                let cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
-                const existing = cart.find(i => i.id === product.id);
+            const product = {
+                id: btn.getAttribute('data-id').toString(),
+                name: btn.getAttribute('data-name'),
+                price: parseFloat(btn.getAttribute('data-price')),
+                image: btn.getAttribute('data-image') || '/images/no-image.png',
+                quantity: qtyToAdd
+            };
 
-                if (existing) {
-                    existing.quantity += 1;
-                } else {
-                    cart.push(product);
-                }
+            let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+            const existing = cart.find(i => i.id === product.id);
 
-                localStorage.setItem('anvat_cart', JSON.stringify(cart));
+            if (existing) {
+                existing.quantity += qtyToAdd;
+            } else {
+                cart.push(product);
+            }
 
-                // Cập nhật giỏ hàng bên phải (Hình 2)
-                if (typeof window.updateCartUI === "function") {
-                    window.updateCartUI();
-                }
+            localStorage.setItem(CART_KEY, JSON.stringify(cart));
 
-                // Tự động bung menu giỏ hàng ra
-                const offcanvasEl = document.getElementById('cartOffcanvas');
-                if (offcanvasEl) {
-                    const bsOffcanvas = new bootstrap.Offcanvas(offcanvasEl);
-                    bsOffcanvas.show();
-                }
-            });
-        });
+            // Cập nhật giao diện Header
+            if (typeof window.updateCartUI === "function") {
+                window.updateCartUI();
+            } else {
+                // Nếu chưa có hàm tổng thì tự cập nhật số badge
+                const badge = document.getElementById('cart-badge');
+                if(badge) badge.innerText = cart.length;
+            }
+
+            // Hiện thông báo
+            alert("Đã thêm " + qtyToAdd + " " + product.name + " vào giỏ hàng!");
+
+            // Mở giỏ hàng nhanh
+            /*
+            const offcanvasEl = document.getElementById('cartOffcanvas');
+            if (offcanvasEl) {
+                const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
+                bsOffcanvas.show();
+            }
+            */
+        }
     </script>
 }

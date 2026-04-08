@@ -136,6 +136,17 @@ namespace WebsiteBanDoAnVat.Controllers
             if (order == null) return NotFound();
             return View("OrderDetail", order);
         }
+        [HttpPost]
+        public async Task<IActionResult> UpdateOrderStatus(int id, string status)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order != null)
+            {
+                order.Status = status;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(OrderDetail), new { id = id });
+        }
 
         public IActionResult DoanhThu()
         {

@@ -80,7 +80,7 @@ namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
             public string UserRole { get; set; }
 
             [Display(Name = "Địa chỉ")]
-            public string? DiaChi { get; set; }
+            public string DiaChi { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)

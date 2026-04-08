@@ -136,6 +136,12 @@
                 <div class="text-end text-muted mb-4" style="font-size: 0.75rem;">(Đã bao gồm VAT nếu có)</div>
 
                 <button class="btn btn-danger w-100 rounded-pill fw-bold py-2 shadow-sm fs-6" id="checkout-btn-text">Mua hàng (0)</button>
+                <form id="checkoutForm" asp-controller="Home" asp-action="Checkout" method="post" class="d-none">
+                    <input type="hidden" name="customerName" id="formCustomerName" />
+                    <input type="hidden" name="phone" id="formPhone" />
+                    <input type="hidden" name="address" id="formAddress" />
+                    <input type="hidden" name="cartJson" id="formCartJson" />
+                </form>
             </div>
         </div>
     </div>
@@ -288,7 +294,7 @@
             // Gộp chuỗi Tỉnh + Quận lại rồi viết thường để quét 1 lần cho sạch lưới
             const fullAddressToScan = (provinceEl.value + " " + (districtEl ? districtEl.value : "")).toLowerCase();
 
-            const cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
+            const cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
             const totalOrder = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
             if (totalOrder >= 500000) {
@@ -392,7 +398,7 @@
             document.addEventListener('cartUpdated', renderCartPage);
 
             function renderCartPage() {
-                const cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
+                const cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
                 const container = document.getElementById('cart-page-items');
                 const emptyMsg = document.getElementById('empty-cart-msg');
                 const cartContent = document.getElementById('cart-content');
@@ -506,6 +512,49 @@
 
                 document.getElementById('checkout-btn-text').innerText = `Mua hàng (${totalQty})`;
             }
+            // --- SỰ KIỆN BẤM NÚT MUA HÀNG ---
+            document.getElementById('checkout-btn-text').addEventListener('click', function() {
+                const cartData = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+                if (cartData.length === 0) {
+                    alert("Giỏ hàng của bạn đang trống!");
+                    return;
+                }
+
+                const fullAddress = document.getElementById('displayAddress').innerText;
+                if (fullAddress === "Vui lòng thêm địa chỉ" || !fullAddress) {
+                    alert("Vui lòng thêm địa chỉ giao hàng trước khi thanh toán!");
+                    new bootstrap.Modal(document.getElementById('addressModal')).show();
+                    return;
+                }
+
+                const recipientName = document.getElementById('recipientName').value;
+                const recipientPhone = document.getElementById('recipientPhone').value;
+
+                if (!recipientName || !recipientPhone) {
+                    alert("Vui lòng nhập đầy đủ Tên và Số điện thoại trong bảng địa chỉ!");
+                    new bootstrap.Modal(document.getElementById('addressModal')).show();
+                    return;
+                }
+
+                // Gán dữ liệu vào Form ẩn
+                document.getElementById('formCustomerName').value = recipientName;
+                document.getElementById('formPhone').value = recipientPhone;
+                document.getElementById('formAddress').value = fullAddress;
+
+                // Format lại Cart JSON cho khớp với Backend (Cần ProductId, Quantity, Price)
+                const backendCart = cartData.map(item => ({
+                    ProductId: parseInt(item.id),
+                    ProductName: item.name,
+                    Price: item.price,
+                    Quantity: item.quantity,
+                    ImageUrl: item.image
+                }));
+
+                document.getElementById('formCartJson').value = JSON.stringify(backendCart);
+
+                // Submit Form
+                document.getElementById('checkoutForm').submit();
+            });
 
             document.body.addEventListener('click', function(e) {
                 if (e.target.closest('.increase-btn') || e.target.closest('.decrease-btn') || e.target.closest('.remove-item-btn') || e.target.closest('.add-to-cart-btn')) {

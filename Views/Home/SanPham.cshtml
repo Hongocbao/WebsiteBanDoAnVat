@@ -45,11 +45,30 @@
 
         <div class="col-lg-9">
             <div class="d-flex flex-wrap gap-2 mb-4 justify-content-center">
-                <a asp-action="SanPham" asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="" class="btn btn-outline-secondary rounded-pill px-4">Tất cả</a>
-                <a asp-action="SanPham" asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="banchay" class="btn btn-outline-danger rounded-pill px-4">🔥 Bán chạy</a>
-                <a asp-action="SanPham" asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="moinhat" class="btn btn-outline-primary rounded-pill px-4">✨ Mới nhất</a>
-                <a asp-action="SanPham" asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="hot" class="btn btn-outline-warning rounded-pill px-4">🌟 Đang HOT</a>
-                <a asp-action="SanPham" asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="giamgia" class="btn btn-outline-success rounded-pill px-4">💸 Giảm giá</a>
+                <a asp-action="SanPham" asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter=""
+                   class="btn @(string.IsNullOrEmpty(ViewBag.Filter) ? "btn-secondary text-white" : "btn-outline-secondary") rounded-pill px-4 fw-bold shadow-sm">
+                    Tất cả
+                </a>
+
+                <a asp-action="SanPham" asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="banchay"
+                   class="btn @(ViewBag.Filter == "banchay" ? "btn-danger text-white" : "btn-outline-danger") rounded-pill px-4 fw-bold shadow-sm">
+                    🔥 Bán chạy
+                </a>
+
+                <a asp-action="SanPham" asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="moinhat"
+                   class="btn @(ViewBag.Filter == "moinhat" ? "btn-primary text-white" : "btn-outline-primary") rounded-pill px-4 fw-bold shadow-sm">
+                    ✨ Mới nhất
+                </a>
+
+                <a asp-action="SanPham" asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="hot"
+                   class="btn @(ViewBag.Filter == "hot" ? "btn-warning text-dark" : "btn-outline-warning") rounded-pill px-4 fw-bold shadow-sm">
+                    🌟 Đang HOT
+                </a>
+
+                <a asp-action="SanPham" asp-route-categoryId="@ViewBag.CurrentCategoryId" asp-route-filter="giatot"
+                   class="btn @(ViewBag.Filter == "giatot" ? "btn-success text-white" : "btn-outline-success") rounded-pill px-4 fw-bold shadow-sm">
+                    💸 Giá tốt nhất
+                </a>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-4">

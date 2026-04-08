@@ -376,18 +376,39 @@
         </div>
     </footer>
 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        // --- 1. SCRIPT ẨN HIỆN HEADER ---
+        // --- 0. ĐỊNH DANH GIỎ HÀNG THEO TÀI KHOẢN ---
+        var currentUserId = '@(User.Identity?.IsAuthenticated == true ? User.Identity.Name : "guest")';
+        var CART_KEY = 'anvat_cart_' + currentUserId;
+
+        // Xử lý gom giỏ hàng: Nếu đang đăng nhập mà có giỏ hàng khách (guest) thì gộp vào
+        if (currentUserId !== "guest") {
+            let guestCart = JSON.parse(localStorage.getItem('anvat_cart_guest'));
+            if (guestCart && guestCart.length > 0) {
+                let userCart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+                guestCart.forEach(gItem => {
+                    let existing = userCart.find(u => u.id === gItem.id);
+                    if (existing) existing.quantity += gItem.quantity;
+                    else userCart.push(gItem);
+                });
+                localStorage.setItem(CART_KEY, JSON.stringify(userCart));
+                localStorage.removeItem('anvat_cart_guest'); // Xóa giỏ khách sau khi gộp
+            }
+        }
+        // --- 1. ẨN HIỆN HEADER KHI CUỘN ---
         let lastScrollTop = 0;
         const header = document.getElementById('mainHeader');
         window.addEventListener('scroll', function() {
-            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            let scrollTop = window.scrollY || document.documentElement.scrollTop;
             header.style.transform = (scrollTop > lastScrollTop && scrollTop > 150) ? "translateY(-100%)" : "translateY(0)";
             lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
         });
 
-        // --- 2. SCRIPT TÌM KIẾM TRỰC TIẾP (LIVE SEARCH) ---
+        // --- 2. LIVE SEARCH (TÌM KIẾM NHANH) ---
         document.addEventListener("DOMContentLoaded", function () {
             const searchInput = document.getElementById('liveSearchInput');
             const searchResults = document.getElementById('searchResults');
@@ -408,7 +429,6 @@
                             .then(response => response.json())
                             .then(data => {
                                 searchResults.innerHTML = '';
-
                                 if (data.length === 0) {
                                     searchResults.innerHTML = '<div class="search-not-found">Không tìm thấy kết quả</div>';
                                 } else {
@@ -434,11 +454,82 @@
             }
         });
 
-        // --- 3. SCRIPT GIỎ HÀNG (FULL LOGIC CỦA ÔNG) ---
+        // --- 3. CẬP NHẬT GIAO DIỆN GIỎ HÀNG MINI TRÊN HEADER ---
+        window.updateCartUI = function() {
+            let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+            const badge = document.getElementById('cart-badge');
+            const miniCount = document.getElementById('mini-cart-count');
+            if(badge) badge.innerText = cart.length;
+            if(miniCount) miniCount.innerText = cart.length;
+
+            const totalQty = cart.reduce((sum, i) => sum + i.quantity, 0);
+            const qtyDisplay = document.getElementById('mini-cart-total-qty');
+            if (qtyDisplay) qtyDisplay.innerText = totalQty + " sản phẩm";
+
+            // Cập nhật nút Thêm vào giỏ ở ngoài trang chủ / sản phẩm
+            document.querySelectorAll('[class*="product-action-"]').forEach(container => {
+                const idMatch = container.className.match(/product-action-(\d+)/);
+                if (idMatch) {
+                    const id = idMatch[1];
+                    const item = cart.find(i => i.id == id);
+                    const addBtn = container.querySelector('.add-to-cart-btn');
+                    const qtyControl = container.querySelector('.quantity-control');
+
+                    if (item) {
+                        if (addBtn) addBtn.classList.add('d-none');
+                        if (qtyControl) { qtyControl.classList.remove('d-none'); qtyControl.classList.add('d-flex'); }
+                        const qtySpan = container.querySelector(`.item-qty-${id}`);
+                        if(qtySpan) qtySpan.innerText = item.quantity;
+                    } else {
+                        if (addBtn) addBtn.classList.remove('d-none');
+                        if (qtyControl) { qtyControl.classList.remove('d-flex'); qtyControl.classList.add('d-none'); }
+                    }
+                }
+            });
+
+            const container = document.getElementById('mini-cart-items');
+            let totalMoney = 0;
+
+            if (cart.length === 0) {
+                if (container) container.innerHTML = '<div class="p-5 text-center text-muted">Giỏ hàng trống</div>';
+            } else {
+                if (container) container.innerHTML = cart.map((item, index) => {
+                    totalMoney += item.price * item.quantity;
+                    return `
+                    <div class="d-flex align-items-center p-3 border-bottom bg-white">
+                        <img src="${item.image}" class="rounded-3 border me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 fw-bold small">${item.name}</h6>
+                            <div class="text-danger small">${item.price.toLocaleString('vi-VN')}đ</div>
+                            <div class="d-flex align-items-center mt-1">
+                                <button class="btn btn-sm decrease-btn border py-0 px-2" data-id="${item.id}">-</button>
+                                <span class="mx-2 small fw-bold">${item.quantity}</span>
+                                <button class="btn btn-sm increase-btn border py-0 px-2" data-id="${item.id}">+</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm text-muted remove-item-btn" data-index="${index}"><i class="fas fa-times"></i></button>
+                    </div>`;
+                }).join('');
+            }
+
+            const miniTotal = document.getElementById('mini-cart-total');
+            if (miniTotal) miniTotal.innerText = totalMoney.toLocaleString('vi-VN') + 'đ';
+        };
+
+        // Hàm lưu và làm mới
+        function saveAndRefresh(cart) {
+            localStorage.setItem(CART_KEY, JSON.stringify(cart));
+            window.updateCartUI();
+        }
+
+        // Gắn sự kiện Global cho các nút giỏ hàng (Ngoài trang chủ)
         document.addEventListener("DOMContentLoaded", function () {
-            let cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
+            window.updateCartUI();
 
             document.body.addEventListener('click', function (e) {
+                let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+
+                // Nút Thêm vào giỏ
                 const addBtn = e.target.closest('.add-to-cart-btn');
                 if (addBtn) {
                     e.preventDefault();
@@ -453,115 +544,45 @@
                     if (item) item.quantity += 1;
                     else cart.push(product);
 
-                    saveAndRefresh();
-                    showToast(`<i class="fas fa-check-circle text-success me-2"></i> Đã thêm <b>${product.name}</b> vào giỏ!`);
+                    saveAndRefresh(cart);
+                    const toastEl = document.getElementById('cartToast');
+                    if(toastEl){
+                        document.getElementById('toastMessage').innerHTML = `<i class="fas fa-check-circle text-success me-2"></i> Đã thêm <b>${product.name}</b> vào giỏ!`;
+                        new bootstrap.Toast(toastEl, { delay: 3000 }).show();
+                    }
                 }
 
+                // Nút Tăng
                 const incBtn = e.target.closest('.increase-btn');
                 if (incBtn) {
                     const id = incBtn.getAttribute('data-id');
                     const item = cart.find(i => i.id == id);
-                    if (item) { item.quantity += 1; saveAndRefresh(); }
+                    if (item) { item.quantity += 1; saveAndRefresh(cart); }
                 }
 
+                // Nút Giảm
                 const decBtn = e.target.closest('.decrease-btn');
                 if (decBtn) {
                     const id = decBtn.getAttribute('data-id');
                     const item = cart.find(i => i.id == id);
                     if (item) {
                         item.quantity -= 1;
-                        if (item.quantity <= 0) {
-                            cart = cart.filter(i => i.id != id);
-                        }
-                        saveAndRefresh();
+                        if (item.quantity <= 0) cart = cart.filter(i => i.id != id);
+                        saveAndRefresh(cart);
                     }
                 }
 
+                // Nút Xóa
                 const remBtn = e.target.closest('.remove-item-btn');
                 if (remBtn) {
                     const idx = remBtn.getAttribute('data-index');
                     cart.splice(idx, 1);
-                    saveAndRefresh();
+                    saveAndRefresh(cart);
                 }
             });
-
-            window.updateCartUI = function() {
-                cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
-                const badge = document.getElementById('cart-badge');
-                const miniCount = document.getElementById('mini-cart-count');
-                if(badge) badge.innerText = cart.length;
-                if(miniCount) miniCount.innerText = cart.length;
-
-                const totalQty = cart.reduce((sum, i) => sum + i.quantity, 0);
-                const qtyDisplay = document.getElementById('mini-cart-total-qty');
-                if (qtyDisplay) qtyDisplay.innerText = totalQty + " sản phẩm";
-
-                // Đồng bộ nút ngoai trang
-                document.querySelectorAll('[class*="product-action-"]').forEach(container => {
-                    const idMatch = container.className.match(/product-action-(\d+)/);
-                    if (idMatch) {
-                        const id = idMatch[1];
-                        const item = cart.find(i => i.id == id);
-                        const addBtn = container.querySelector('.add-to-cart-btn');
-                        const qtyControl = container.querySelector('.quantity-control');
-
-                        if (item) {
-                            if (addBtn) addBtn.classList.add('d-none');
-                            if (qtyControl) { qtyControl.classList.remove('d-none'); qtyControl.classList.add('d-flex'); }
-                            const qtySpan = container.querySelector(`.item-qty-${id}`);
-                            if(qtySpan) qtySpan.innerText = item.quantity;
-                        } else {
-                            if (addBtn) addBtn.classList.remove('d-none');
-                            if (qtyControl) { qtyControl.classList.remove('d-flex'); qtyControl.classList.add('d-none'); }
-                        }
-                    }
-                });
-
-                const container = document.getElementById('mini-cart-items');
-                let totalMoney = 0;
-
-                if (cart.length === 0) {
-                    if (container) container.innerHTML = '<div class="p-5 text-center text-muted">Giỏ hàng trống</div>';
-                } else {
-                    if (container) container.innerHTML = cart.map((item, index) => {
-                        totalMoney += item.price * item.quantity;
-                        return `
-                        <div class="d-flex align-items-center p-3 border-bottom bg-white">
-                            <img src="${item.image}" class="rounded-3 border me-3" style="width: 60px; height: 60px; object-fit: cover;">
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0 fw-bold small">${item.name}</h6>
-                                <div class="text-danger small">${item.price.toLocaleString('vi-VN')}đ</div>
-                                <div class="d-flex align-items-center mt-1">
-                                    <button class="btn btn-sm decrease-btn border py-0 px-2" data-id="${item.id}">-</button>
-                                    <span class="mx-2 small fw-bold">${item.quantity}</span>
-                                    <button class="btn btn-sm increase-btn border py-0 px-2" data-id="${item.id}">+</button>
-                                </div>
-                            </div>
-                            <button class="btn btn-sm text-muted remove-item-btn" data-index="${index}"><i class="fas fa-times"></i></button>
-                        </div>`;
-                    }).join('');
-                }
-
-                const miniTotal = document.getElementById('mini-cart-total');
-                if (miniTotal) miniTotal.innerText = totalMoney.toLocaleString('vi-VN') + 'đ';
-            };
-
-            function saveAndRefresh() {
-                localStorage.setItem('anvat_cart', JSON.stringify(cart));
-                window.updateCartUI();
-            }
-
-            function showToast(messageHtml) {
-                const toastEl = document.getElementById('cartToast');
-                if (toastEl) {
-                    document.getElementById('toastMessage').innerHTML = messageHtml;
-                    new bootstrap.Toast(toastEl, { delay: 3000 }).show();
-                }
-            }
-
-            window.updateCartUI();
         });
     </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

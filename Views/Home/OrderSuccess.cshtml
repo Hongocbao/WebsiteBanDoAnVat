@@ -3,12 +3,23 @@
 }
 
 <div class="container text-center py-5">
-    <div class="cart-card p-5 shadow-sm rounded-4">
+    <div class="cart-card p-5 shadow-sm rounded-4 bg-white mx-auto" style="max-width: 600px;">
         <img src="https://cdn-icons-png.flaticon.com/512/148/148767.png" style="width: 100px;" class="mb-4">
         <h2 class="fw-bold text-success">Đặt hàng thành công!</h2>
-        <p class="text-muted">Cảm ơn bạn đã ủng hộ shop. Đơn hàng của bạn đang được hệ thống xử lý.</p>
+        <p class="text-muted">Cảm ơn bạn đã ủng hộ Ăn Vặt Foodie. Đơn hàng của bạn đang được hệ thống xử lý.</p>
         <div class="mt-4">
-            <a asp-action="Index" class="btn btn-danger rounded-pill px-4">Tiếp tục mua sắm</a>
+            <a asp-action="Index" class="btn btn-danger rounded-pill px-5 py-2 fw-bold">Tiếp tục mua sắm</a>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Xóa giỏ hàng trong LocalStorage sau khi thanh toán thành công
+        localStorage.removeItem(CART_KEY);
+        // Reset lại số đếm mini-cart
+        if (typeof window.updateCartUI === "function") {
+            window.updateCartUI();
+        }
+    </script>
+}
