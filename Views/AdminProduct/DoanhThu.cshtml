@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IEnumerable<WebsiteBanDoAnVat.Models.Order>
+@{
     ViewData["Title"] = "Thống kê doanh thu";
 }
 
@@ -7,27 +8,28 @@
 
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label fw-bold small">Từ ngày</label>
-                    <input type="date" class="form-control">
+            <form asp-action="DoanhThu" method="get">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold small">Từ ngày</label>
+                        <input type="date" name="tuNgay" class="form-control" value="@ViewBag.TuNgay">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold small">Đến ngày</label>
+                        <input type="date" name="denNgay" class="form-control" value="@ViewBag.DenNgay">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold small">Loại báo cáo</label>
+                        <select name="loaiBaoCao" class="form-select">
+                            <option value="ngay">Thống kê theo ngày</option>
+                            <option value="thang">Thống kê theo tháng</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success w-100 fw-bold">Lấy dữ liệu</button>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label fw-bold small">Đến ngày</label>
-                    <input type="date" class="form-control">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label fw-bold small">Loại báo cáo</label>
-                    <select class="form-select">
-                        <option>Thống kê theo ngày</option>
-                        <option>Thống kê theo tháng</option>
-                        <option>Thống kê theo món ăn</option>
-                    </select>
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button class="btn btn-success w-100 fw-bold">Lấy dữ liệu</button>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -36,7 +38,7 @@
             <div class="card bg-primary border-0 shadow-sm">
                 <div class="card-body py-4">
                     <h6 class="text-uppercase opacity-75 small">Tổng doanh thu</h6>
-                    <h2 class="fw-bold mb-0">15.250.000đ</h2>
+                    <h2 class="fw-bold mb-0">@ViewBag.TotalRevenue.ToString("N0")đ</h2>
                 </div>
             </div>
         </div>
@@ -44,15 +46,15 @@
             <div class="card bg-warning text-dark border-0 shadow-sm">
                 <div class="card-body py-4">
                     <h6 class="text-uppercase opacity-75 small">Tổng số hóa đơn</h6>
-                    <h2 class="fw-bold mb-0">124</h2>
+                    <h2 class="fw-bold mb-0">@ViewBag.TotalOrders</h2>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card bg-info border-0 shadow-sm">
                 <div class="card-body py-4">
-                    <h6 class="text-uppercase opacity-75 small">Lợi nhuận ước tính</h6>
-                    <h2 class="fw-bold mb-0">4.500.000đ</h2>
+                    <h6 class="text-uppercase opacity-75 small">Lợi nhuận ước tính (30%)</h6>
+                    <h2 class="fw-bold mb-0">@ViewBag.EstimatedProfit.ToString("N0")đ</h2>
                 </div>
             </div>
         </div>
@@ -67,7 +69,7 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Mã HD</th>
+                            <th>Mã đơn</th>
                             <th>Thời gian</th>
                             <th>Khách hàng</th>
                             <th class="text-end">Tổng tiền</th>
@@ -75,13 +77,34 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>#HD10025</td>
-                            <td>05/04/2026 19:30</td>
-                            <td>Bảo Ngọc</td>
-                            <td class="fw-bold text-end">185.000đ</td>
-                            <td class="text-center"><span class="badge bg-success">Hoàn thành</span></td>
-                        </tr>
+                        @if (ViewBag.StatsByMonth != null)
+                        {
+                            @* --- CHẾ ĐỘ THỐNG KÊ THEO THÁNG --- *@
+                            @foreach (var item in ViewBag.StatsByMonth)
+                            {
+                                <tr class="table-info">
+                                    <td colspan="2" class="fw-bold"><i class="fas fa-calendar-alt me-2"></i>Tháng: @item.Thang</td>
+                                    <td>@item.SoDon đơn hàng</td>
+                                    <td class="fw-bold text-end text-primary">@item.DoanhThu.ToString("N0")đ</td>
+                                    <td class="text-center"><span class="badge bg-info">Đã tổng hợp</span></td>
+                                </tr>
+                            }
+                            <tr><td colspan="5" class="text-center small text-muted">Chi tiết các đơn hàng bên dưới</td></tr>
+                        }
+
+                        @* --- LUÔN HIỂN THỊ DANH SÁCH ĐƠN LẺ Ở DƯỚI --- *@
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td>#@order.Id</td>
+                                <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@order.CustomerName</td>
+                                <td class="fw-bold text-end text-danger">@order.TotalAmount.ToString("N0")đ</td>
+                                <td class="text-center">
+                                    <span class="badge @(order.Status == "Hoàn thành" ? "bg-success" : "bg-warning text-dark")">@order.Status</span>
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>

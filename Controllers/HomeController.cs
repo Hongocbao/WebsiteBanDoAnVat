@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -7,17 +8,20 @@ using System.Diagnostics;
 using WebsiteBanDoAnVat.Data;
 using WebsiteBanDoAnVat.Models;
 
+
 namespace WebsiteBanDoAnVat.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
         private readonly AppDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public HomeController(ILogger<HomeController> logger, AppDbContext context)
+        public HomeController(ILogger<HomeController> logger, AppDbContext context, UserManager<ApplicationUser> userManager)
         {
             _logger = logger;
             _context = context;
+            _userManager = userManager;
         }
 
         // 1. TRANG CHỦ & PHÂN TRANG
@@ -162,8 +166,12 @@ namespace WebsiteBanDoAnVat.Controllers
             if (string.IsNullOrEmpty(cartJson) || cartJson == "[]") return RedirectToAction("Cart");
 
             var cartItems = JsonConvert.DeserializeObject<List<CartItem>>(cartJson!);
+            // LẤY ID NGƯỜI DÙNG ĐANG ĐĂNG NHẬP
+            var userId = User.Identity?.IsAuthenticated == true ? _userManager.GetUserId(User) : null;
+
             var order = new Order
             {
+                UserId = userId,
                 CustomerName = customerName,
                 PhoneNumber = phone,
                 Address = address,

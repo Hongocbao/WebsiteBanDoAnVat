@@ -52,47 +52,40 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 
-// --- PHẦN THÊM MỚI: SEED DATA ADMIN (ĐÃ TỐI ƯU ĐỂ ĐĂNG NHẬP BẰNG USERNAME) ---
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-    // 1. Tạo các Role mặc định
-    string[] roleNames = { "Admin", "Customer" };
-    foreach (var roleName in roleNames)
+    // 1. Tạo Role Admin
+    if (!await roleManager.RoleExistsAsync("Admin"))
     {
-        if (!roleManager.RoleExistsAsync(roleName).Result)
-        {
-            roleManager.CreateAsync(new IdentityRole(roleName)).Wait();
-        }
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
     }
 
     // 2. Tạo tài khoản Admin
-    var adminEmail = "admin@gmail.com";
     var adminID = "admin"; // Tên đăng nhập ngắn gọn
+    var adminEmail = "admin@gmail.com";
 
-    // Tìm thử theo UserName "admin" xem có chưa
-    var adminUser = userManager.FindByNameAsync(adminID).Result;
+    var adminUser = await userManager.FindByNameAsync(adminID);
 
     if (adminUser == null)
     {
-        var user = new ApplicationUser
+        adminUser = new ApplicationUser
         {
-            UserName = adminID,      // GIỜ ĐÂY USERNAME LÀ "admin"
+            UserName = adminID,      // Đăng nhập bằng chữ "admin"
             Email = adminEmail,
             HoTen = "Quản Trị Viên",
+            IsAdmin = true,          // Quyền Quản trị (màu vàng)
+            IsSuperAdmin = true,     // QUYỀN TỐI CAO (màu đỏ)
             EmailConfirmed = true,
-            IsActive = true
+            NgayDangKy = DateTime.Now
         };
 
-        // Mật khẩu: Admin1@
-        var createPowerUser = userManager.CreateAsync(user, "Admin1@").Result;
-
-        if (createPowerUser.Succeeded)
+        var result = await userManager.CreateAsync(adminUser, "Admin1@");
+        if (result.Succeeded)
         {
-            userManager.AddToRoleAsync(user, "Admin").Wait();
+            await userManager.AddToRoleAsync(adminUser, "Admin");
         }
     }
 }

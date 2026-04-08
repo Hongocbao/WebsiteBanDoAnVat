@@ -77,14 +77,14 @@ namespace WebsiteBanDoAnVat.Controllers
         // ==========================================================
         public async Task<IActionResult> TrackingOrder()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var userId = _userManager.GetUserId(User); // Lấy ID thay vì lấy cả User object cho nhẹ
+            if (userId == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            // Lấy danh sách đơn hàng dựa trên số điện thoại của người dùng đang đăng nhập
-            var orders = await _context.Orders
+            // Lọc theo UserId đã lưu trong đơn hàng
+            var orders = await _context.Orders 
                 .Include(o => o.OrderDetails!)
                 .ThenInclude(d => d.MonAn)
-                .Where(o => o.PhoneNumber == user.PhoneNumber) // Khớp theo số điện thoại trong hồ sơ
+                .Where(o => o.UserId == userId) // Sửa lại dòng này
                 .OrderByDescending(o => o.OrderDate)
                 .AsNoTracking()
                 .ToListAsync();

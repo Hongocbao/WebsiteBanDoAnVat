@@ -148,11 +148,66 @@ namespace WebsiteBanDoAnVat.Controllers
             return RedirectToAction(nameof(OrderDetail), new { id = id });
         }
 
-        public IActionResult DoanhThu()
+        public async Task<IActionResult> DoanhThu(DateTime? tuNgay, DateTime? denNgay, string loaiBaoCao)
         {
-            var recentOrders = _context.Orders.OrderByDescending(o => o.OrderDate).Take(10).AsNoTracking().ToList();
-            ViewBag.TotalRevenue = _context.Orders.Sum(o => o.TotalAmount);
-            ViewBag.TotalOrders = _context.Orders.Count();
+            // 1. Lấy truy vấn cơ bản (Chỉ tính những đơn đã "Hoàn thành" thì doanh thu mới chuẩn)
+            var query = _context.Orders.Where(o => o.Status == "Hoàn thành").AsQueryable();
+
+            // 2. Lọc theo thời gian nếu Admin chọn trên giao diện
+            if (tuNgay.HasValue)
+            {
+                query = query.Where(o => o.OrderDate >= tuNgay.Value);
+            }
+            if (denNgay.HasValue)
+            {
+                // Thêm 1 ngày để bao gồm cả dữ liệu của ngày kết thúc
+                var endDate = denNgay.Value.AddDays(1);
+                query = query.Where(o => o.OrderDate < endDate);
+            }
+            if (loaiBaoCao == "thang")
+            {
+                // Chúng ta lấy dữ liệu thô về trước (ToList), sau đó mới định dạng chuỗi ở trên RAM
+                var rawStats = await query
+                    .GroupBy(o => new { o.OrderDate.Month, o.OrderDate.Year })
+                    .Select(g => new {
+                        Month = g.Key.Month,
+                        Year = g.Key.Year,
+                        DoanhThu = g.Sum(o => o.TotalAmount),
+                        SoDon = g.Count()
+                    })
+                    .ToListAsync();
+
+                // Bây giờ mới biến thành dạng chuỗi "Tháng/Năm" để hiển thị
+                var statsByMonth = rawStats.Select(s => new {
+                    Thang = $"{s.Month}/{s.Year}",
+                    DoanhThu = s.DoanhThu,
+                    SoDon = s.SoDon
+                }).ToList();
+
+                ViewBag.StatsByMonth = statsByMonth;
+            }
+
+            // 3. Lấy danh sách đã lọc
+            var orders = await query.OrderByDescending(o => o.OrderDate).AsNoTracking().ToListAsync();
+
+            // 4. Tính toán các con số tổng quát
+            decimal totalRevenue = orders.Sum(o => o.TotalAmount);
+            int totalOrders = orders.Count;
+
+            // Giả sử lợi nhuận = 30% doanh thu (Ông có thể sửa số 0.3 này tùy ý)
+            decimal estimatedProfit = totalRevenue * 0.3m;
+
+            // 5. Gửi dữ liệu qua ViewBag để hiển thị lên mấy cái Box màu sắc
+            ViewBag.TotalRevenue = totalRevenue;
+            ViewBag.TotalOrders = totalOrders;
+            ViewBag.EstimatedProfit = estimatedProfit;
+
+            // Gửi thêm ngày đã chọn để hiển thị lại trên ô Input sau khi load trang
+            ViewBag.TuNgay = tuNgay?.ToString("yyyy-MM-dd");
+            ViewBag.DenNgay = denNgay?.ToString("yyyy-MM-dd");
+
+            // 6. Trả về View cùng với danh sách 10 giao dịch gần nhất
+            var recentOrders = orders.Take(10).ToList();
             return View("DoanhThu", recentOrders);
         }
 

@@ -4,6 +4,7 @@ namespace WebsiteBanDoAnVat.Models
 {
     public class Order
     {
+        public string? UserId { get; set; }
         public int Id { get; set; }
         public string CustomerName { get; set; } = ""; 
         public string PhoneNumber { get; set; } = ""; 

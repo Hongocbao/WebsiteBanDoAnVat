@@ -11,7 +11,7 @@
             @if (!Model.Any())
             {
                 <div class="alert alert-info text-center">
-                    Bạn chưa có đơn hàng nào với số điện thoại này.
+                    <i class="fas fa-info-circle me-2"></i> Bạn chưa có đơn hàng nào trong lịch sử mua hàng.
                 </div>
             }
             else
@@ -24,27 +24,31 @@
                             <span class="badge @(order.Status == "Thành công" ? "bg-success" : "bg-warning text-dark")">@order.Status</span>
                         </div>
                         <div class="card-body">
-                            <div class="row px-3">
-                                <div class="col-12">
-                                    <div class="track-line d-flex justify-content-between position-relative">
+                            <div class="row">
+                                <div class="col-12 px-4">
+                                    <div class="track-line d-flex justify-content-between position-relative w-100">
                                         @{
                                             var s = order.Status;
                                         }
-                                        <div class="step-item text-center @(s == "Chờ duyệt" || s == "Đã xác nhận" || s == "Đang giao" || s == "Thành công" ? "active" : "")">
-                                            <div class="dot"><i class="fas fa-clock"></i></div>
-                                            <p class="small">Chờ duyệt</p>
-                                        </div>
-                                        <div class="step-item text-center @(s == "Đã xác nhận" || s == "Đang giao" || s == "Thành công" ? "active" : "")">
-                                            <div class="dot"><i class="fas fa-check"></i></div>
-                                            <p class="small">Đã xác nhận</p>
-                                        </div>
-                                        <div class="step-item text-center @(s == "Đang giao" || s == "Thành công" ? "active" : "")">
-                                            <div class="dot"><i class="fas fa-truck"></i></div>
-                                            <p class="small">Đang giao</p>
-                                        </div>
-                                        <div class="step-item text-center @(s == "Thành công" ? "active" : "")">
-                                            <div class="dot"><i class="fas fa-home"></i></div>
-                                            <p class="small">Thành công</p>
+                                        <div class="track-line d-flex justify-content-between position-relative">
+
+                                            <div class="step-item text-center @(s == "Chờ duyệt" || s == "Đang chuẩn bị" || s == "Đang giao" || s == "Hoàn thành" ? "active" : "")">
+                                                <div class="dot"><i class="fas fa-clock"></i></div>
+                                                <p class="small">Chờ duyệt</p>
+                                            </div>
+
+                                            <div class="step-item text-center @(s == "Đang chuẩn bị" || s == "Đang giao" || s == "Hoàn thành" ? "active" : "")">
+                                                <div class="dot"><i class="fas fa-box"></i></div> <p class="small">Đang chuẩn bị</p>
+                                            </div>
+
+                                            <div class="step-item text-center @(s == "Đang giao" || s == "Hoàn thành" ? "active" : "")">
+                                                <div class="dot"><i class="fas fa-truck"></i></div>
+                                                <p class="small">Đang giao</p>
+                                            </div>
+
+                                            <div class="step-item text-center @(s == "Hoàn thành" ? "active" : "")">
+                                                <div class="dot"><i class="fas fa-check-circle"></i></div> <p class="small">Hoàn thành</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -70,18 +74,59 @@
 </div>
 
 <style>
-    .track-line::before {
-        content: ""; position: absolute; top: 18px; left: 0; width: 100%; height: 3px;
-        background: #e0e0e0; z-index: 1;
+    .track-line {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        width: 100%; /* Ép dài 100% */
+        padding: 40px 0; /* Tăng độ thoáng */
     }
-    .step-item { z-index: 2; width: 25%; position: relative; }
+
+        .track-line::before {
+            content: "";
+            position: absolute;
+            top: 60px; /* Chỉnh cái thanh ngang nằm đúng giữa dot */
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+
+    .step-item {
+        flex: 1; /* Chia đều không gian để dài ra */
+        position: relative;
+        z-index: 2;
+        text-align: center;
+    }
+
     .dot {
-        width: 36px; height: 36px; background: #e0e0e0; color: #fff;
-        border-radius: 50%; margin: 0 auto 8px; display: flex;
-        align-items: center; justify-content: center;
-        border: 4px solid #fff; transition: 0.3s;
+        width: 40px;
+        height: 40px;
+        background: #e0e0e0;
+        color: #fff;
+        border-radius: 50%;
+        margin: 0 auto 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 4px solid #fff;
+        transition: 0.3s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    .step-item.active .dot { background: #ff4757; }
-    .step-item.active p { color: #ff4757; font-weight: bold; }
-    .small { font-size: 11px; }
+
+    .step-item.active .dot {
+        background: #ff4757;
+    }
+
+    .step-item p {
+        font-size: 13px; /* Tăng size chữ tí cho dễ đọc */
+        margin: 0;
+        color: #a4b0be;
+    }
+
+    .step-item.active p {
+        color: #ff4757;
+        font-weight: bold;
+    }
 </style>
