@@ -23,6 +23,14 @@
                 Chào @(user?.HoTen ?? User.Identity?.Name)!
             </a>
         </li>
+
+        @* --- THÊM NÚT THEO DÕI ĐƠN HÀNG VÀO ĐÂY --- *@
+        <li class="nav-item">
+            <a class="nav-link text-dark fw-bold px-2 d-flex align-items-center" asp-controller="Profile" asp-action="TrackingOrder" title="Theo dõi đơn hàng">
+                <i class="fas fa-shipping-fast text-primary me-1"></i> Đơn hàng
+            </a>
+        </li>
+
         <li class="nav-item">
             <form class="form-inline m-0" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
                 <button type="submit" class="btn btn-link nav-link text-dark fw-bold px-2">

@@ -4,6 +4,8 @@ using WebsiteBanDoAnVat.Models;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore; // Thêm để dùng ToListAsync
+using WebsiteBanDoAnVat.Data; // Thêm để dùng AppDbContext
 
 namespace WebsiteBanDoAnVat.Controllers
 {
@@ -11,11 +13,13 @@ namespace WebsiteBanDoAnVat.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly AppDbContext _context; // Thêm context để lấy đơn hàng
 
-        public ProfileController(UserManager<ApplicationUser> userManager, IWebHostEnvironment webHostEnvironment)
+        public ProfileController(UserManager<ApplicationUser> userManager, IWebHostEnvironment webHostEnvironment, AppDbContext context)
         {
             _userManager = userManager;
             _webHostEnvironment = webHostEnvironment;
+            _context = context; // Khởi tạo context
         }
 
         // Trang hiển thị hồ sơ (Sửa lỗi 404 khi vào /Profile)
@@ -66,6 +70,26 @@ namespace WebsiteBanDoAnVat.Controllers
             }
 
             return View("Index", user);
+        }
+
+        // ==========================================================
+        // NEW: TRANG THEO DÕI ĐƠN HÀNG (DỰA TRÊN PHONE NUMBER)
+        // ==========================================================
+        public async Task<IActionResult> TrackingOrder()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+
+            // Lấy danh sách đơn hàng dựa trên số điện thoại của người dùng đang đăng nhập
+            var orders = await _context.Orders
+                .Include(o => o.OrderDetails!)
+                .ThenInclude(d => d.MonAn)
+                .Where(o => o.PhoneNumber == user.PhoneNumber) // Khớp theo số điện thoại trong hồ sơ
+                .OrderByDescending(o => o.OrderDate)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return View(orders);
         }
     }
 }

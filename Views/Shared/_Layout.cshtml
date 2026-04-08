@@ -297,6 +297,12 @@
                     <li><a class="nav-link-custom @(ViewContext.RouteData.Values["Action"]?.ToString() == "LienHe" ? "active" : "")" asp-controller="Home" asp-action="LienHe">Liên hệ</a></li>
                     <li><a class="nav-link-custom @(ViewContext.RouteData.Values["Action"]?.ToString() == "Cart" ? "active" : "")" asp-controller="Home" asp-action="Cart">Giỏ hàng</a></li>
 
+                    @* --- THÊM LINK THEO DÕI ĐƠN HÀNG VÀO THANH ĐIỀU HƯỚNG --- *@
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <li><a class="nav-link-custom @(ViewContext.RouteData.Values["Action"]?.ToString() == "TrackingOrder" ? "active" : "")" asp-controller="Profile" asp-action="TrackingOrder">Đơn hàng</a></li>
+                    }
+
                     @* MENU QUẢN TRỊ - CẬP NHẬT TỪ BẠN ÔNG (CÓ SUPERADMIN) *@
                     @if (SignInManager.IsSignedIn(User) && (User.IsInRole("Admin") || User.HasClaim("IsSuperAdmin", "True")))
                     {
