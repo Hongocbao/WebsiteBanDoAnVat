@@ -8,5 +8,7 @@
         public int SoSao { get; set; } // 1 - 5 sao
         public DateTime NgayDang { get; set; } = DateTime.Now;
         public int MonAnId { get; set; } // Liên kết với món ăn
+
+        public string? HinhAnh { get; set; }
     }
 }

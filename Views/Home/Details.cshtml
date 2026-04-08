@@ -4,83 +4,156 @@
 }
 
 <div class="container mt-5">
-    <div class="row bg-white p-4 shadow-sm rounded-4">
+    <div class="row bg-white p-4 shadow-sm rounded-4 border">
         <div class="col-md-5 text-center">
-            <img src="@Model.ImageUrl" class="img-fluid rounded-4 shadow-sm" alt="@Model.Name" style="max-height: 400px; width: 100%; object-fit: cover;">
+            <img src="@Model.ImageUrl" class="img-fluid rounded-4 shadow-sm" style="max-height: 400px; width: 100%; object-fit: cover;" alt="@Model.Name">
         </div>
         <div class="col-md-7 ps-md-5 pt-4 pt-md-0">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item active">@Model.Name</li>
+                </ol>
+            </nav>
             <h1 class="fw-bold text-dark">@Model.Name</h1>
-            <div class="d-flex align-items-center gap-2 mb-3">
-                <span class="text-warning"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></span>
-                <span class="text-muted small">(4.5/5 - 24 đánh giá)</span>
+            <div class="d-flex align-items-center gap-2 mb-3 text-warning">
+                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                <span class="text-muted small ms-2">(@(Model.DanhGias?.Count ?? 0) đánh giá)</span>
             </div>
             <h3 class="text-danger fw-bold">@Model.Price.ToString("N0") VNĐ</h3>
             <hr>
             <p class="text-muted" style="line-height: 1.8;">@Model.Description</p>
 
-            <div class="mt-4 d-flex gap-3">
-                <button class="btn btn-danger btn-lg px-5 rounded-pill shadow-sm" onclick="muaNgay(@Model.Id)">
-                    <i class="fas fa-bolt me-2"></i>MUA NGAY
+            <div class="mt-4">
+                <button type="button" class="btn text-white btn-lg px-5 rounded-pill fw-bold add-to-cart-btn shadow-sm"
+                        data-id="@Model.Id"
+                        data-name="@Model.Name"
+                        data-price="@Model.Price"
+                        data-image="@Model.ImageUrl"
+                        style="background-color: #81B64C; min-width: 250px; height: 55px;">
+                    THÊM VÀO GIỎ HÀNG <i class="fas fa-shopping-bag ms-2"></i>
                 </button>
-
-                <form asp-action="AddToCart" method="post">
-                    <input type="hidden" name="productId" value="@Model.Id" />
-                    <button type="submit" class="btn btn-outline-danger btn-lg px-4 rounded-pill">
-                        <i class="fas fa-cart-plus"></i>
-                    </button>
-                </form>
             </div>
         </div>
     </div>
 
-    <div class="row mt-5 bg-white p-4 shadow-sm rounded-4 mb-5">
+    <div class="row mt-5 bg-white p-4 shadow-sm rounded-4 mb-5 border">
         <div class="col-12">
-            <h4 class="fw-bold mb-4 border-bottom pb-2">Đánh giá từ khách hàng</h4>
+            <h4 class="fw-bold mb-4 border-bottom pb-2 text-uppercase">Đánh giá từ khách hàng</h4>
 
-            <div class="mb-5 p-3 border rounded-3 bg-light">
-                <h6 class="fw-bold">Viết đánh giá của bạn</h6>
-                <form asp-action="PostComment" method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="MonAnId" value="@Model.Id" />
-                    <div class="mb-3">
-                        <label class="form-label small">Chất lượng sản phẩm</label>
-                        <select name="Rating" class="form-select form-select-sm w-auto text-warning">
-                            <option value="5">⭐⭐⭐⭐⭐ (Tuyệt vời)</option>
-                            <option value="4">⭐⭐⭐⭐ (Tốt)</option>
-                            <option value="3">⭐⭐⭐ (Bình thường)</option>
-                        </select>
+            <div class="mb-5 p-4 border rounded-3 bg-light shadow-sm">
+                <h6 class="fw-bold mb-3"><i class="fas fa-edit me-2"></i>Gửi nhận xét của bạn</h6>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <form asp-action="PostComment" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="MonAnId" value="@Model.Id" />
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Xếp hạng:</label>
+                                <select name="SoSao" class="form-select text-warning fw-bold">
+                                    <option value="5">⭐⭐⭐⭐⭐</option>
+                                    <option value="4">⭐⭐⭐⭐</option>
+                                    <option value="3">⭐⭐⭐</option>
+                                    <option value="2">⭐⭐</option>
+                                    <option value="1">⭐</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <textarea name="NoiDung" class="form-control shadow-sm" rows="3" placeholder="Món ăn này có hương vị thế nào?..." required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="small fw-bold"><i class="fas fa-camera me-1"></i>Thêm hình ảnh thực tế:</label>
+                            <input type="file" name="imageFile" class="form-control form-control-sm shadow-sm" accept="image/*">
+                        </div>
+                        <button type="submit" class="btn btn-dark px-5 rounded-pill shadow-sm">Gửi đánh giá</button>
+                    </form>
+                }
+                else
+                {
+                    <div class="text-center py-3">
+                        <p class="text-muted">Vui lòng đăng nhập để gửi đánh giá cho món ăn này.</p>
+                        <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-outline-primary rounded-pill px-4">
+                            <i class="fas fa-sign-in-alt me-2"></i> Đăng nhập ngay
+                        </a>
                     </div>
-                    <div class="mb-3">
-                        <textarea name="Content" class="form-control" rows="3" placeholder="Món ăn này có ngon không Bảo? Hãy chia sẻ cảm nhận nhé..."></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small">Gửi kèm hình ảnh đánh giá (nếu có)</label>
-                        <input type="file" name="imageFile" class="form-control form-control-sm">
-                    </div>
-                    <button type="submit" class="btn btn-dark btn-sm rounded-pill px-4">Gửi đánh giá</button>
-                </form>
+                }
             </div>
 
-            <div class="review-list">
-                <div class="d-flex gap-3 mb-4 border-bottom pb-3">
-                    <img src="https://ui-avatars.com/api/?name=Ngoc+Bao&background=random" class="rounded-circle" width="50" height="50">
-                    <div>
-                        <div class="d-flex align-items-center gap-2">
-                            <h6 class="mb-0 fw-bold">Ngọc Bảo</h6>
-                            <span class="text-warning small"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></span>
+            <div class="review-list mt-4">
+                @if (Model.DanhGias != null && Model.DanhGias.Any())
+                {
+                    @foreach (var d in Model.DanhGias.OrderByDescending(x => x.NgayDang))
+                    {
+                        <div class="d-flex gap-3 mb-4 border-bottom pb-3">
+                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center shadow-sm fw-bold" style="width: 50px; height: 50px; flex-shrink: 0;">
+                                @(string.IsNullOrEmpty(d.UserName) ? "K" : d.UserName.Substring(0, 1).ToUpper())
+                            </div>
+                            <div class="w-100">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="fw-bold mb-0 text-primary">@d.UserName</h6>
+                                    <small class="text-muted">@d.NgayDang.ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                                <div class="text-warning small my-1">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="@(i <= d.SoSao ? "fas" : "far") fa-star"></i>
+                                    }
+                                </div>
+                                <p class="mb-1 text-dark">@d.NoiDung</p>
+                            </div>
                         </div>
-                        <p class="mb-1 text-muted small">10:30 - 06/04/2026</p>
-                        <p class="mb-0">Món này cực kỳ ngon, giòn và vừa miệng. Sẽ ủng hộ shop dài dài!</p>
-                    </div>
-                </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted italic">Chưa có bình luận nào cho món này.</div>
+                }
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    function muaNgay(id) {
-        // Chức năng này sẽ gọi AddToCart sau đó chuyển thẳng tới trang Thanh Toán
-        console.log("Đang tiến hành mua ngay sản phẩm ID:", id);
-        // Implement logic redirect ở đây
-    }
-</script>   
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.add-to-cart-btn').on('click', function (e) {
+                e.preventDefault();
+
+                // MẶC ĐỊNH MỖI LẦN BẤM LÀ 1
+                const product = {
+                    id: $(this).data('id').toString(),
+                    name: $(this).data('name'),
+                    price: parseFloat($(this).data('price')),
+                    image: $(this).data('image') || '/images/no-image.png',
+                    quantity: 1
+                };
+
+                // Logic LocalStorage
+                let cart = JSON.parse(localStorage.getItem('anvat_cart')) || [];
+                const existing = cart.find(i => i.id === product.id);
+
+                if (existing) {
+                    existing.quantity += 1;
+                } else {
+                    cart.push(product);
+                }
+
+                localStorage.setItem('anvat_cart', JSON.stringify(cart));
+
+                // Cập nhật giỏ hàng bên phải (Hình 2)
+                if (typeof window.updateCartUI === "function") {
+                    window.updateCartUI();
+                }
+
+                // Tự động bung menu giỏ hàng ra
+                const offcanvasEl = document.getElementById('cartOffcanvas');
+                if (offcanvasEl) {
+                    const bsOffcanvas = new bootstrap.Offcanvas(offcanvasEl);
+                    bsOffcanvas.show();
+                }
+            });
+        });
+    </script>
+}

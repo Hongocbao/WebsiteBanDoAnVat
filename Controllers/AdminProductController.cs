@@ -93,6 +93,29 @@ namespace WebsiteBanDoAnVat.Controllers
             return View("Edit", monAn);
         }
 
+        // --- HÀM XÓA SẢN PHẨM (BỔ SUNG) ---
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null) return NotFound();
+            var monAn = await _context.MonAns.Include(m => m.Category).FirstOrDefaultAsync(m => m.Id == id);
+            if (monAn == null) return NotFound();
+            return View(monAn);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var monAn = await _context.MonAns.FindAsync(id);
+            if (monAn != null)
+            {
+                if (!string.IsNullOrEmpty(monAn.ImageUrl)) DeleteOldImage(monAn.ImageUrl);
+                _context.MonAns.Remove(monAn);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
         // ==========================================
         // 2. QUẢN LÝ ĐƠN HÀNG & DOANH THU
         // ==========================================
@@ -140,42 +163,28 @@ namespace WebsiteBanDoAnVat.Controllers
             return View("KhachHang", list);
         }
 
-        // Logic xem chi tiết một khách hàng cụ thể
         public async Task<IActionResult> UserDetail(string id)
         {
             if (id == null) return NotFound();
-
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
-
             return View(user);
         }
 
+        // --- HÀM ĐỔI QUYỀN (FIX LỖI 404 CHANGERÔLE) ---
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleAdminRole(string userId)
         {
-            // 1. Lấy thông tin người thực hiện
             var currentUser = await _userManager.GetUserAsync(User);
-
-            // 2. Kiểm tra quyền SuperAdmin
             if (currentUser == null || !currentUser.IsSuperAdmin)
             {
-                TempData["Error"] = "Chỉ Quản trị viên tối cao mới có quyền thay đổi vai trò!";
+                TempData["Error"] = "Chỉ SuperAdmin mới có quyền này!";
                 return RedirectToAction(nameof(KhachHang));
             }
 
             var targetUser = await _userManager.FindByIdAsync(userId);
             if (targetUser == null) return NotFound();
 
-            // 3. Bảo vệ tài khoản SuperAdmin
-            if (targetUser.IsSuperAdmin)
-            {
-                TempData["Error"] = "Không thể tác động lên tài khoản tối cao!";
-                return RedirectToAction(nameof(KhachHang));
-            }
-
-            // LOGIC ĐỔI QUYỀN (Toggle)
             if (targetUser.IsAdmin)
             {
                 targetUser.IsAdmin = false;
@@ -190,7 +199,6 @@ namespace WebsiteBanDoAnVat.Controllers
             }
 
             await _userManager.UpdateAsync(targetUser);
-            TempData["Success"] = $"Đã cập nhật quyền cho {targetUser.Email} thành công!";
             return RedirectToAction(nameof(KhachHang));
         }
 
@@ -202,7 +210,6 @@ namespace WebsiteBanDoAnVat.Controllers
             string fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
             string uploadPath = Path.Combine(_hostEnvironment.WebRootPath, "images", subFolder);
 
-            // Tự động tạo thư mục nếu chưa tồn tại
             if (!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
 
             string path = Path.Combine(uploadPath, fileName);
