@@ -55,7 +55,6 @@ namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            // THAY THẾ STUDENTID THÀNH HOTEN
             [Required(ErrorMessage = "Vui lòng nhập Họ và Tên.")]
             [Display(Name = "Họ và Tên")]
             public string HoTen { get; set; }
@@ -76,7 +75,6 @@ namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
             [Compare("Password", ErrorMessage = "Mật khẩu xác nhận không khớp.")]
             public string ConfirmPassword { get; set; }
 
-            // Giữ lại để xử lý phân quyền Admin nếu cần
             public string UserRole { get; set; }
 
             [Display(Name = "Địa chỉ")]
@@ -98,10 +96,10 @@ namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
-                // GÁN THÔNG TIN MỚI VÀO DATABASE
                 user.HoTen = Input.HoTen;
                 user.DiaChi = Input.DiaChi;
                 user.NgayDangKy = DateTime.Now;
+                user.EmailConfirmed = true;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -112,10 +110,8 @@ namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("Đã tạo tài khoản mới thành công.");
 
-                    // Mặc định cho mọi tài khoản mới là Customer
                     string roleName = "Customer";
 
-                    // Logic phân quyền đơn giản
                     if (!string.IsNullOrEmpty(Input.UserRole) && Input.UserRole.Contains("Admin"))
                     {
                         roleName = "Admin";
@@ -129,6 +125,27 @@ namespace WebsiteBanDoAnVat.Areas.Identity.Pages.Account
                     }
 
                     await _userManager.AddToRoleAsync(user, roleName);
+
+                    // ====================================================================
+                    // BẮT ĐẦU: THÊM CODE TỰ ĐỘNG GỬI EMAIL XÁC NHẬN SAU KHI TẠO TÀI KHOẢN
+                    // ====================================================================
+
+                    var userId = await _userManager.GetUserIdAsync(user);
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+                    var callbackUrl = Url.Page(
+                        "/Account/ConfirmEmail",
+                        pageHandler: null,
+                        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
+                        protocol: Request.Scheme);
+
+                    await _emailSender.SendEmailAsync(Input.Email, "Xác nhận đăng ký tài khoản Ăn Vặt Foodie",
+                        $"Chào mừng bạn đã đến với Ăn Vặt Foodie! <br/> Vui lòng xác nhận tài khoản của bạn bằng cách <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>BẤM VÀO ĐÂY</a>.");
+
+                    // ====================================================================
+                    // KẾT THÚC: ĐOẠN CODE GỬI EMAIL
+                    // ====================================================================
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
