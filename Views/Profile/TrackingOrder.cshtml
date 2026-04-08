@@ -1,0 +1,87 @@
+﻿@model IEnumerable<WebsiteBanDoAnVat.Models.Order>
+@{
+    ViewData["Title"] = "Theo dõi đơn hàng";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <h3 class="text-center mb-4"><i class="fas fa-box"></i> ĐƠN HÀNG CỦA BẠN</h3>
+
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info text-center">
+                    Bạn chưa có đơn hàng nào với số điện thoại này.
+                </div>
+            }
+            else
+            {
+                @foreach (var order in Model)
+                {
+                    <div class="card mb-4 shadow-sm border-0">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <span><strong>Mã đơn: #@order.Id</strong></span>
+                            <span class="badge @(order.Status == "Thành công" ? "bg-success" : "bg-warning text-dark")">@order.Status</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row px-3">
+                                <div class="col-12">
+                                    <div class="track-line d-flex justify-content-between position-relative">
+                                        @{
+                                            var s = order.Status;
+                                        }
+                                        <div class="step-item text-center @(s == "Chờ duyệt" || s == "Đã xác nhận" || s == "Đang giao" || s == "Thành công" ? "active" : "")">
+                                            <div class="dot"><i class="fas fa-clock"></i></div>
+                                            <p class="small">Chờ duyệt</p>
+                                        </div>
+                                        <div class="step-item text-center @(s == "Đã xác nhận" || s == "Đang giao" || s == "Thành công" ? "active" : "")">
+                                            <div class="dot"><i class="fas fa-check"></i></div>
+                                            <p class="small">Đã xác nhận</p>
+                                        </div>
+                                        <div class="step-item text-center @(s == "Đang giao" || s == "Thành công" ? "active" : "")">
+                                            <div class="dot"><i class="fas fa-truck"></i></div>
+                                            <p class="small">Đang giao</p>
+                                        </div>
+                                        <div class="step-item text-center @(s == "Thành công" ? "active" : "")">
+                                            <div class="dot"><i class="fas fa-home"></i></div>
+                                            <p class="small">Thành công</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="mb-1"><strong>Người nhận:</strong> @order.CustomerName</p>
+                                    <p class="mb-1"><strong>Địa chỉ:</strong> @order.Address</p>
+                                </div>
+                                <div class="col-sm-6 text-sm-end">
+                                    <p class="mb-1"><strong>Ngày đặt:</strong> @order.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                                    <p class="mb-0 text-danger font-weight-bold"><strong>Tổng: @order.TotalAmount.ToString("N0")đ</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .track-line::before {
+        content: ""; position: absolute; top: 18px; left: 0; width: 100%; height: 3px;
+        background: #e0e0e0; z-index: 1;
+    }
+    .step-item { z-index: 2; width: 25%; position: relative; }
+    .dot {
+        width: 36px; height: 36px; background: #e0e0e0; color: #fff;
+        border-radius: 50%; margin: 0 auto 8px; display: flex;
+        align-items: center; justify-content: center;
+        border: 4px solid #fff; transition: 0.3s;
+    }
+    .step-item.active .dot { background: #ff4757; }
+    .step-item.active p { color: #ff4757; font-weight: bold; }
+    .small { font-size: 11px; }
+</style>
